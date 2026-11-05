@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiabe in CAA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap">
+<style>
+/* Layout: barra laterale con la libreria delle fiabe, a destra il testo da scrivere e l'anteprima CAA. Cella CAA = pittogramma sopra, parola sotto, bordo colorato (chiave di Fitzgerald). In stampa resta solo la fiaba. */
+:root{
+  --bg:#fbfaf6; --fg:#1d1d1b; --muted:#6b6a64; --card:#ffffff; --line:#dedbd2; --pan:#f1eee6;
+  --persona:#f2c400; --verbo:#2e9e4f; --nome:#ef7d1a; --agg:#2f7fd1; --funz:#9a978e;
+  --font:"Andika","Comic Sans MS","Trebuchet MS",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px}
+button{font-family:var(--font);font-size:.95rem;padding:7px 12px;border-radius:10px;border:2px solid var(--fg);background:var(--card);color:var(--fg);cursor:pointer}
+button.pri{background:var(--fg);color:var(--bg)}
+button.min{border-color:var(--line);font-size:.85rem;padding:5px 9px}
+button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,.w:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--agg);outline-offset:2px}
+input,textarea{font-family:var(--font);font-size:1rem;border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card);color:var(--fg)}
+
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100%}
+aside{background:var(--pan);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:12px}
+aside h1{font-size:1.5rem;margin:0;line-height:1.1}
+aside .sub{color:var(--muted);font-size:.85rem;margin:0}
+.lista{display:flex;flex-direction:column;gap:4px;overflow:auto;flex:1}
+.lista button{text-align:left;border:2px solid transparent;background:transparent;padding:7px 10px;border-radius:8px}
+.lista button:hover{background:var(--card)}
+.lista button.att{background:var(--card);border-color:var(--fg)}
+.lista .grp{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px 4px}
+.lista .grp:first-child{margin-top:0}
+.aside-azioni{display:flex;flex-direction:column;gap:6px}
+.aside-azioni .riga{display:flex;gap:6px;flex-wrap:wrap}
+.credits{font-size:.72rem;color:var(--muted);line-height:1.4;margin:0}
+
+main{padding-block:18px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-width:0}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.top input#titolo{font-size:1.6rem;font-weight:700;flex:1;min-width:200px;border-color:transparent;background:transparent;padding-left:4px}
+.top input#titolo:hover,.top input#titolo:focus{border-color:var(--line);background:var(--card)}
+.top .sx{display:flex;gap:8px;flex-wrap:wrap}
+.editor{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;background:var(--pan);padding:14px;border-radius:14px}
+.editor textarea{width:100%;min-height:200px;line-height:1.5;resize:vertical}
+.editor .aiuto{font-size:.88rem;color:var(--muted);line-height:1.5;margin:0}
+.editor .aiuto code{background:var(--card);padding:1px 5px;border-radius:5px}
+.editor .riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:6px 0 4px;color:var(--muted);font-size:.9rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:4px;border:3px solid;display:inline-block}
+.hint{color:var(--muted);font-size:.9rem;margin:0 0 6px}
+
+.fiaba h2{font-size:1.6rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:3px solid var(--fg)}
+.frase{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--line)}
+.w{display:flex;flex-direction:column;align-items:center;min-width:112px;max-width:230px;padding:6px;border:4px solid var(--funz);border-radius:12px;background:var(--card);cursor:pointer;position:relative;transition:transform .1s}
+.w:hover{transform:scale(1.04);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.w.p{border-color:var(--persona)} .w.v{border-color:var(--verbo)} .w.n{border-color:var(--nome)} .w.a{border-color:var(--agg)}
+:root{--pic:96px;--tf:1.25rem}
+.pic{width:var(--pic);height:var(--pic);display:flex;align-items:center;justify-content:center}
+.pic img{width:var(--pic);height:var(--pic);object-fit:contain}
+.w{min-width:calc(var(--pic) + 20px)}
+.t{font-size:var(--tf);font-weight:700;margin-top:4px;text-align:center;line-height:1.15}
+body.maiu .t{text-transform:uppercase}
+.vuoto-msg{color:var(--muted);padding:30px 0}
+.pagina{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--card)}
+.pagina .testa{font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.pagina .frase{border-bottom:none}
+.pagina .frase + .frase{border-top:1px dashed var(--line)}
+.capo{flex-basis:100%;font-size:1.1rem;font-weight:700;color:var(--muted)}
+.stampa-opz{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.stampa-opz label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.stampa-opz select{font-family:var(--font);font-size:1rem;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg)}
+.stampa-opz .chk{flex-direction:row;align-items:center;gap:8px;align-self:end;padding-bottom:6px}
+.cop{display:none}
+
+/* Finestra di modifica cella */
+dialog{border:none;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--fg);font-family:var(--font)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:20px}
+.dlg h3{margin:0 0 4px;font-size:1.4rem}
+.dlg p{margin:0 0 12px;color:var(--muted)}
+.cerca{display:flex;gap:8px;margin-bottom:10px}
+.cerca input{flex:1;min-width:0}
+.cat{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;font-size:.9rem;color:var(--muted)}
+.cat button{padding:4px 10px;font-size:.85rem;border-width:3px}
+.cat button.p{border-color:var(--persona)} .cat button.v{border-color:var(--verbo)} .cat button.n{border-color:var(--nome)} .cat button.a{border-color:var(--agg)} .cat button.x{border-color:var(--funz)}
+.cat button[aria-pressed="true"]{background:var(--pan);color:var(--fg)}
+.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:42vh;overflow:auto;padding:2px}
+.opt{border:3px solid transparent;border-radius:10px;padding:4px;background:#f3f1ea;cursor:pointer;display:flex;align-items:center;justify-content:center;aspect-ratio:1}
+.opt img{width:100%;height:100%;object-fit:contain}
+.opt:hover{border-color:var(--agg)}
+.opt.sel{border-color:var(--verbo);background:#e4f5e9}
+.stato{color:var(--muted);padding:12px;text-align:center}
+.azioni{display:flex;justify-content:space-between;gap:8px;margin-top:14px;flex-wrap:wrap}
+.azioni .gr{display:flex;gap:8px;flex-wrap:wrap}
+
+@media (max-width:760px){.app{grid-template-columns:1fr}aside{border-right:none;border-bottom:1px solid var(--line)}.lista{max-height:180px}}
+
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff}
+  aside,.top .sx,.editor,.hint,.legend,dialog{display:none!important}
+  .app{display:block}
+  main{padding:0}
+  .top input#titolo{border:none;background:transparent;font-size:2.2rem;padding:0}
+  .cop{display:block;font-size:.8rem;color:#777;margin:0 0 8px}
+  .stampa-opz,.frase.fine-pagina::after{display:none!important}
+  .fiaba h2{break-before:page;margin-top:0}
+  .fiaba section:first-of-type h2{break-before:auto}
+  body.no-cap .fiaba h2{display:none}
+  .frase{break-inside:avoid;border-bottom-color:#ccc}
+  body.pp .top,body.pp .cop{display:none}
+  .pagina{height:calc(100vh - 2px);break-after:page;break-inside:avoid;display:grid;grid-template-rows:auto repeat(var(--n),1fr);border:none;border-radius:0;padding:0;margin:0;background:#fff}
+  .pagina:last-child{break-after:auto}
+  .pagina .testa{font-size:.8rem;color:#777;padding-bottom:2mm;border-bottom:1px solid #ccc}
+  .pagina .frase{align-content:flex-start;overflow:hidden;padding:4mm 0;border-top:none}
+  .pagina .frase + .frase{border-top:1px dashed #bbb}
+  .capo{color:#555}
+  body.no-colori .w{border-color:#333!important}
+  body.centra .frase{justify-content:center}
+  .w{break-inside:avoid;transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body class="maiu">
+<div class="app">
+<aside>
+  <div>
+    <h1>Fiabe in CAA</h1>
+    <p class="sub">Comunicazione Aumentativa e Alternativa, con i pittogrammi ARASAAC</p>
+  </div>
+  <div class="lista" id="lista"></div>
+  <div class="aside-azioni">
+    <button class="pri" id="bNuova">+ Nuova fiaba</button>
+    <div class="riga">
+      <button class="min" id="bEsporta">Salva copia</button>
+      <button class="min" id="bImporta">Carica copia</button>
+      <input type="file" id="fImporta" accept="application/json" hidden>
+    </div>
+  </div>
+  <p class="credits">Pittogrammi: Sergio Palao. Origine: ARASAAC (arasaac.org). Licenza CC BY-NC-SA. Proprietà: Governo d'Aragona (Spagna). Serve la connessione internet per vedere i pittogrammi.</p>
+</aside>
+
+<main>
+  <div class="top">
+    <input id="titolo" aria-label="Titolo della fiaba" placeholder="Titolo della fiaba">
+    <div class="sx">
+      <button id="bTesto" aria-pressed="true">Testo</button>
+      <button id="bOpz" aria-pressed="true">Stampa: opzioni</button>
+      <button id="bMaiu" aria-pressed="true">MAIUSCOLO</button>
+      <button id="bStampa" class="pri">Stampa</button>
+    </div>
+  </div>
+  <p class="cop" id="cop"></p>
+
+  <div class="editor" id="editor">
+    <p class="aiuto">Scrivi la fiaba con <strong>frasi brevi, una per riga</strong> (soggetto, verbo, oggetto). Per iniziare un capitolo scrivi <code>## Titolo del capitolo</code>. Gli articoli si uniscono da soli alla parola che segue. Dopo, clicca su una cella per cambiare il pittogramma o caricare una foto tua, cambiare il colore, unire o separare le parole.</p>
+    <textarea id="testo" spellcheck="false" placeholder="## La famiglia&#10;C'è un bambino.&#10;Il bambino è piccolo."></textarea>
+    <div class="riga">
+      <button class="pri" id="bGenera">Crea le celle</button>
+      <button id="bDuplica">Duplica fiaba</button>
+      <button id="bReset">Ripristina celle</button>
+      <button id="bElimina">Elimina fiaba</button>
+    </div>
+  </div>
+
+  <div class="stampa-opz" id="opz">
+    <label>Frasi per foglio A4
+      <select id="oPP"><option value="0">Di seguito (tante quante entrano)</option><option value="1">1 frase per foglio</option><option value="2">2 frasi per foglio</option><option value="3">3 frasi per foglio</option><option value="4">4 frasi per foglio</option><option value="5">5 frasi per foglio</option><option value="6">6 frasi per foglio</option></select>
+    </label>
+    <label>Dimensione celle
+      <select id="oDim"><option value="80">Piccole</option><option value="110" selected>Medie</option><option value="150">Grandi</option><option value="200">Molto grandi</option></select>
+    </label>
+    <label>Foglio
+      <select id="oOri"><option value="portrait">Verticale</option><option value="landscape">Orizzontale</option></select>
+    </label>
+    <label class="chk"><input type="checkbox" id="oCap" checked> Titoli dei capitoli</label>
+    <label class="chk"><input type="checkbox" id="oCol" checked> Bordi colorati</label>
+    <label class="chk"><input type="checkbox" id="oCen"> Frasi centrate</label>
+  </div>
+  <div class="legend">
+    <span><i style="border-color:var(--persona)"></i>Persone e animali</span>
+    <span><i style="border-color:var(--verbo)"></i>Azioni</span>
+    <span><i style="border-color:var(--nome)"></i>Cose e luoghi</span>
+    <span><i style="border-color:var(--agg)"></i>Come sono</span>
+    <span><i style="border-color:var(--funz)"></i>Altre parole</span>
+  </div>
+  <p class="hint">Clicca su una cella per modificarla. Le modifiche si salvano da sole su questo computer.</p>
+  <div class="fiaba" id="fiaba"></div>
+</main>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h3 id="dTitolo">Cella</h3>
+    <p>Clicca un'immagine per sceglierla, cerca un'altra parola (al singolare, verbi all'infinito) oppure carica una foto tua.</p>
+    <form class="cerca" id="fCerca">
+      <input id="iCerca" type="search" placeholder="Cerca una parola..." autocomplete="off">
+      <button type="submit">Cerca</button>
+    </form>
+    <div class="cat">Colore:
+      <button type="button" class="p" data-cat="p">Persona</button>
+      <button type="button" class="v" data-cat="v">Azione</button>
+      <button type="button" class="n" data-cat="n">Cosa</button>
+      <button type="button" class="a" data-cat="a">Com'è</button>
+      <button type="button" class="x" data-cat="x">Altro</button>
+    </div>
+    <div class="griglia" id="griglia"></div>
+    <div class="azioni">
+      <div class="gr">
+        <button type="button" id="bUnisciSx">◀ Unisci a sinistra</button>
+        <button type="button" id="bUnisci">Unisci a destra ▶</button>
+        <button type="button" id="bSepara">Separa</button>
+        <button type="button" id="bFoto">Carica una foto</button>
+        <input type="file" id="fFoto" accept="image/*" hidden>
+        <button type="button" id="bNessuna">Senza immagine</button>
+      </div>
+      <button type="button" id="bChiudi">Chiudi</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+/* ============ LIBRERIA DI FIABE ============
+   Testo semplice: una frase per riga, "## " apre un capitolo.
+   Annotazione facoltativa: parola=chiave|alternativa/categoria  (categorie: p v n a x)
+   Underscore unisce parole in una cella: Cappuccetto_Rosso                 */
+const LIBRERIA = [
+{id:"lib-pollicino", titolo:"Pollicino", testo:`## La famiglia
+C'è un bambino.
+Il bambino è piccolo.
+Si_chiama=chiamarsi|nome/v Pollicino=#7176/p.
+Pollicino=#7176/p ha sei fratelli.
+La famiglia è povera.
+Non c'è cibo.
+## Il bosco
+Papà porta i bambini nel bosco.
+Pollicino=#7176/p prende i sassi bianchi.
+Pollicino=#7176/p butta i sassi per_terra=terra/n.
+Papà va_via=andare via|andare/v.
+I bambini sono soli.
+Pollicino=#7176/p guarda i sassi.
+I bambini seguono i sassi.
+I bambini tornano a casa.
+La mamma è contenta.
+## Le briciole
+Papà porta i bambini nel bosco.
+Pollicino=#7176/p ha il pane.
+Pollicino=#7176/p butta le briciole per_terra=terra/n.
+Gli uccellini mangiano le briciole.
+Pollicino=#7176/p non trova la strada.
+I bambini hanno paura.
+## L'orco
+I bambini vedono una casa.
+Nella casa c'è un orco.
+L'orco è grande e cattivo.
+I bambini dormono.
+Pollicino=#7176/p è furbo.
+Pollicino=#7176/p sveglia i fratelli.
+I bambini scappano.
+## Gli stivali
+L'orco corre.
+L'orco è stanco.
+L'orco dorme.
+Pollicino=#7176/p prende gli stivali magici=magia|mago/a.
+Gli stivali fanno passi grandi.
+Pollicino=#7176/p corre veloce.
+## La fine
+Pollicino=#7176/p torna a casa.
+Pollicino=#7176/p porta tanti soldi.
+La famiglia mangia.
+Tutti sono felici.
+Fine.`},
+{id:"lib-cappuccetto", titolo:"Cappuccetto Rosso", testo:`## La mamma
+C'è una bambina.
+Si_chiama=chiamarsi|nome/v Cappuccetto_Rosso=cappuccetto rosso|bambina/p.
+La mamma dà un cestino.
+Nel cestino c'è la torta.
+La torta è per la nonna.
+La nonna è malata.
+## Il bosco
+Cappuccetto_Rosso=cappuccetto rosso|bambina/p va nel bosco.
+Nel bosco c'è il lupo.
+Il lupo è furbo.
+Il lupo chiede: "Dove vai?"
+Cappuccetto_Rosso=cappuccetto rosso|bambina/p dice: "Vado dalla nonna."
+Il lupo corre dalla nonna.
+## La casa della nonna
+Il lupo mangia la nonna.
+Il lupo si_mette=mettere/v a letto.
+Cappuccetto_Rosso=cappuccetto rosso|bambina/p arriva.
+"Nonna, che occhi grandi!"
+"Nonna, che orecchie grandi!"
+"Nonna, che bocca grande!"
+Il lupo salta.
+Il lupo mangia Cappuccetto_Rosso=cappuccetto rosso|bambina/p.
+## Il cacciatore
+Arriva il cacciatore.
+Il cacciatore apre la pancia del lupo.
+La nonna esce.
+Cappuccetto_Rosso=cappuccetto rosso|bambina/p esce.
+Tutti sono salvi.
+Il lupo scappa via.
+Fine.`},
+{id:"lib-porcellini", titolo:"I tre porcellini", testo:`## Tre fratelli
+Ci_sono=essere/v tre porcellini=maiale/p.
+I porcellini=maiale/p sono fratelli.
+Ogni porcellino=maiale/p costruisce una casa.
+## Le tre case
+Il primo porcellino=maiale/p fa una casa di paglia.
+Il secondo porcellino=maiale/p fa una casa di legno.
+Il terzo porcellino=maiale/p fa una casa di mattoni.
+La casa di mattoni è forte.
+## Il lupo
+Arriva il lupo.
+Il lupo ha fame.
+Il lupo soffia sulla casa di paglia.
+La casa cade.
+Il porcellino=maiale/p scappa.
+Il lupo soffia sulla casa di legno.
+La casa cade.
+I porcellini=maiale/p scappano.
+## La casa di mattoni
+Il lupo soffia sulla casa di mattoni.
+La casa non cade.
+Il lupo entra dal camino.
+Nel camino c'è il fuoco.
+Il lupo si_scotta=bruciare/v.
+Il lupo scappa via.
+I tre porcellini=maiale/p sono salvi.
+Fine.`},
+{id:"lib-riccioli", titolo:"Riccioli d'oro e i tre orsi", testo:`## I tre orsi
+Nel bosco c'è una casa.
+Nella casa vivono tre orsi.
+Papà orso è grande.
+Mamma orsa è media.
+L'orsetto è piccolo.
+Gli orsi vanno a passeggio.
+## La bambina
+Arriva una bambina.
+Si_chiama=chiamarsi|nome/v Riccioli_d'oro=bambina/p.
+La bambina entra nella casa.
+## La zuppa
+Sul tavolo ci_sono=essere/v tre ciotole.
+La bambina assaggia la zuppa grande.
+È troppo calda.
+La bambina assaggia la zuppa media.
+È troppo fredda.
+La bambina assaggia la zuppa piccola.
+È buona.
+La bambina mangia tutto.
+## Le sedie
+La bambina si_siede=sedersi/v sulla sedia grande.
+È troppo dura.
+La bambina si_siede=sedersi/v sulla sedia piccola.
+La sedia si_rompe=rompere/v.
+## I letti
+La bambina è stanca.
+La bambina dorme nel letto piccolo.
+## Gli orsi tornano
+Gli orsi tornano a casa.
+"Chi ha mangiato la mia zuppa?"
+"Chi ha rotto la mia sedia?"
+"Chi dorme nel mio letto?"
+La bambina si_sveglia=svegliarsi/v.
+La bambina ha paura.
+La bambina scappa a casa.
+Fine.`},
+{id:"lib-anatroccolo", titolo:"Il brutto anatroccolo", testo:`## Le uova
+Mamma anatra ha sei uova.
+Le uova si_aprono=aprire/v.
+Nascono cinque anatroccoli gialli.
+L'ultimo anatroccolo è grigio.
+L'anatroccolo grigio è grande.
+## Nessuno lo vuole
+Gli altri anatroccoli ridono.
+Le galline lo_beccano=beccare/v.
+L'anatroccolo è triste.
+L'anatroccolo va_via=andare via|andare/v.
+## L'inverno
+Arriva l'inverno.
+Fa freddo.
+L'anatroccolo è solo.
+L'anatroccolo ha fame.
+## La primavera
+Arriva la primavera.
+L'anatroccolo guarda nell'acqua.
+Vede un cigno bianco.
+Il cigno è lui!
+L'anatroccolo è un cigno.
+I cigni lo_accolgono=abbracciare/v.
+Il cigno è felice.
+Fine.`},
+{id:"lib-cenerentola", titolo:"Cenerentola", testo:`## La casa
+C'è una ragazza.
+Si_chiama=chiamarsi|nome/v Cenerentola=cenerentola|ragazza/p.
+Cenerentola=cenerentola|ragazza/p è buona.
+La matrigna è cattiva.
+Le sorellastre sono cattive.
+Cenerentola=cenerentola|ragazza/p pulisce la casa.
+Cenerentola=cenerentola|ragazza/p lava i piatti.
+## La festa
+Il principe fa una festa.
+Le sorellastre vanno alla festa.
+Cenerentola=cenerentola|ragazza/p resta a casa.
+Cenerentola=cenerentola|ragazza/p piange.
+## La fata
+Arriva la fata.
+La fata fa una magia.
+Cenerentola=cenerentola|ragazza/p ha un vestito bellissimo.
+Cenerentola=cenerentola|ragazza/p ha le scarpette di vetro.
+La fata dice: "Torna a mezzanotte!"
+## Il ballo
+Cenerentola=cenerentola|ragazza/p va alla festa.
+Il principe balla con Cenerentola=cenerentola|ragazza/p.
+Suona la mezzanotte.
+Cenerentola=cenerentola|ragazza/p scappa.
+Cenerentola=cenerentola|ragazza/p perde una scarpetta.
+## La scarpetta
+Il principe cerca la ragazza.
+Il principe prova la scarpetta a tutte.
+La scarpetta va_bene=bene/a solo a Cenerentola=cenerentola|ragazza/p.
+Il principe sposa Cenerentola=cenerentola|ragazza/p.
+Sono felici.
+Fine.`},
+{id:"lib-biancaneve", titolo:"Biancaneve", testo:`## La regina
+C'è una principessa.
+Si_chiama=chiamarsi|nome/v Biancaneve=biancaneve|principessa/p.
+La regina è cattiva.
+La regina ha uno specchio magico.
+Lo specchio dice: "Biancaneve=biancaneve|principessa/p è la più bella."
+La regina è arrabbiata.
+## Il bosco
+Biancaneve=biancaneve|principessa/p scappa nel bosco.
+Nel bosco c'è una casetta.
+Nella casetta vivono sette nani.
+I nani sono buoni.
+Biancaneve=biancaneve|principessa/p resta con i nani.
+## La mela
+La regina si_traveste=travestirsi|maschera/v da vecchia.
+La vecchia porta una mela.
+La mela è avvelenata=veleno/a.
+Biancaneve=biancaneve|principessa/p mangia la mela.
+Biancaneve=biancaneve|principessa/p si_addormenta=addormentarsi|dormire/v.
+I nani piangono.
+## Il principe
+Arriva il principe.
+Il principe bacia Biancaneve=biancaneve|principessa/p.
+Biancaneve=biancaneve|principessa/p si_sveglia=svegliarsi/v.
+Tutti sono felici.
+Fine.`},
+{id:"lib-lepre", titolo:"La lepre e la tartaruga", testo:`## La sfida
+C'è una lepre.
+La lepre è veloce.
+C'è una tartaruga.
+La tartaruga è lenta.
+La lepre ride della tartaruga.
+La tartaruga dice: "Facciamo una gara!"
+## La gara
+Via!
+La lepre corre veloce.
+La tartaruga cammina piano.
+La lepre è molto avanti.
+La lepre si_ferma=fermarsi/v.
+La lepre dorme sotto un albero.
+## L'arrivo
+La tartaruga cammina.
+La tartaruga non si_ferma=fermarsi/v.
+La tartaruga passa la lepre.
+La lepre si_sveglia=svegliarsi/v.
+La lepre corre.
+È tardi!
+La tartaruga vince.
+Piano piano si arriva lontano.
+Fine.`}
+];
+
+/* ============ MOTORE ============ */
+const API = "https://api.arasaac.org/api/pictograms/it";
+const IMG = id => String(id).startsWith("u-") ? ((stato.mie.find(m => m.id === id) || {}).data || "") : `https://static.arasaac.org/pictograms/${id}/${id}_300.png`;
+const STORE = "fiabe-caa-v1", CACHE = "fiabe-caa-cache-v1";
+
+// Parole che si uniscono alla parola dopo (articoli e preposizioni articolate)
+const ARTICOLI = new Set(["il","lo","la","i","gli","le","un","uno","una","l'","nel","nello","nella","nei","negli","nelle","del","dello","della","dei","degli","delle","al","allo","alla","ai","agli","alle","dal","dallo","dalla","dai","dagli","dalle","sul","sullo","sulla","sui","sugli","sulle","a","di","da","in","con","su","per","tra","fra"]);
+// Parole senza pittogramma proprio o con pittogramma fisso
+const FISSE = {"c'è":"essere","ci":"essere","si":null,"lo":null,"la":null,"e":"e","ma":"ma","non":"no","che":null,"è":"essere","sono":"essere","ha":"avere","hanno":"avere","fa":"fare","fanno":"fare","va":"andare","vanno":"andare","dà":"dare","dice":"dire","dicono":"dire","vede":"vedere","vedono":"vedere","esce":"uscire","escono":"uscire","viene":"venire","vengono":"venire","sta":"stare","stanno":"stare","può":"potere","vuole":"volere","sa":"sapere","beve":"bere","più":"più","molto":"molto","tanti":"molto","tante":"molto","tanto":"molto","troppo":"troppo","tutti":"tutti","tutto":"tutto","ogni":"tutti","chi":"chi","dove":"dove","mio":"mio","mia":"mio","sua":"suo","suo":"suo","fine":"fine","via":"andare via","sei":"sei","tre":"tre","cinque":"cinque","sette":"sette","primo":"primo","secondo":"secondo","terzo":"terzo","ultimo":"ultimo","lui":"lui","lei":"lei","vai":"andare","vado":"andare","torna":"tornare"};
+const CAT_FISSE = {"essere":"v","avere":"v","fare":"v","andare":"v","dare":"v","dire":"v","vedere":"v","uscire":"v","venire":"v","stare":"v","potere":"v","volere":"v","sapere":"v","bere":"v","tornare":"v","andare via":"v","più":"a","molto":"a","troppo":"a","sei":"a","tre":"a","cinque":"a","sette":"a","primo":"a","secondo":"a","terzo":"a","ultimo":"a","tutti":"p","tutto":"n","lui":"p","lei":"p","fine":"n"};
+
+let stato = {fiabe:[], attiva:null, mie:[]};
+try { Object.assign(stato, JSON.parse(localStorage.getItem(STORE) || "{}")); } catch(e) {}
+let cache = {};
+try { cache = JSON.parse(localStorage.getItem(CACHE) || "{}"); } catch(e) {}
+function salva(){ try { localStorage.setItem(STORE, JSON.stringify(stato)); } catch(e) {} }
+function salvaCache(){ try { localStorage.setItem(CACHE, JSON.stringify(cache)); } catch(e) {} }
+
+// Le fiabe della libreria entrano nel salvataggio la prima volta (poi si possono modificare)
+for (const l of LIBRERIA) if (!stato.fiabe.some(f => f.id === l.id)) stato.fiabe.push({id:l.id, titolo:l.titolo, testo:l.testo, mod:{}});
+if (!stato.attiva || !stato.fiabe.some(f => f.id === stato.attiva)) stato.attiva = stato.fiabe[0].id;
+stato.mie = stato.mie || [];
+salva();
+
+const inVolo = {};
+async function ricerca(chiave){
+  if (cache[chiave]) return cache[chiave];
+  if (inVolo[chiave]) return inVolo[chiave];
+  inVolo[chiave] = (async () => {
+    for (const ep of ["bestsearch","search"]) {
+      try {
+        const r = await fetch(`${API}/${ep}/${encodeURIComponent(chiave)}`);
+        if (r.ok) {
+          const j = await r.json();
+          if (j.length) {
+            const ris = j.slice(0, 40).map(p => ({id:p._id, cat:catDaArasaac(p)}));
+            cache[chiave] = ris; salvaCache(); return ris;
+          }
+        }
+      } catch(e) {}
+    }
+    cache[chiave] = []; salvaCache(); return [];
+  })();
+  return inVolo[chiave];
+}
+function catDaArasaac(p){
+  const tipi = (p.keywords || []).map(k => k.type);
+  const tags = (p.tags || []).concat(p.categories || []);
+  if (tipi.includes(3)) return "v";
+  if (tipi.includes(4) || tipi.includes(5)) return "a";
+  if (tags.some(t => /person|family|profession|animal|child|fantasy character|group/.test(t))) return "p";
+  return "n";
+}
+// Candidati di ricerca per una parola italiana flessa
+function candidati(w){
+  const c = [w];
+  const add = s => { if (s.length > 1 && !c.includes(s)) c.push(s); };
+  const r = (suf, ...rep) => { if (w.endsWith(suf)) rep.forEach(x => add(w.slice(0, -suf.length) + x)); };
+  r("ano","are"); r("ono","ere","ire"); r("iamo","are","ere","ire"); r("ate","are"); r("ete","ere"); r("ite","ire");
+  r("isce","ire"); r("iscono","ire"); r("ato","are"); r("ata","are"); r("ati","are"); r("ate","are"); r("uto","ere"); r("ito","ire");
+  r("chi","co"); r("ghi","go"); r("che","ca"); r("ghe","ga"); r("ci","cio","co"); r("gi","gio");
+  r("ini","ino","o"); r("ine","ina","a"); r("ino","o"); r("ina","a"); r("etto","o"); r("etta","a"); r("etti","o"); r("ette","a");
+  r("issimo","o"); r("issima","a"); r("issimi","o"); r("issime","a");
+  r("i","o","e","are","ire"); r("e","a","are","ere","o"); r("a","o","are"); r("o","are");
+  return c;
+}
+async function trovaParola(chiave){
+  // chiave: "#123" | "parola|alternativa" | parola flessa
+  if (chiave.startsWith("#")) return {id:chiave.slice(1), cat:null, chiave:chiave};
+  for (const alt of chiave.split("|")) {
+    const lista = alt in FISSE && FISSE[alt] === null ? [] : [FISSE[alt] || alt];
+    if (!(alt in FISSE)) lista.push(...candidati(alt).slice(1));
+    for (const c of lista) {
+      const ris = await ricerca(c);
+      if (ris.length) return {id:ris[0].id, cat:CAT_FISSE[c] || ris[0].cat, chiave:c};
+    }
+  }
+  return {id:null, cat:"x", chiave:chiave.split("|")[0]};
+}
+
+// Analisi del testo in capitoli -> frasi -> parole
+function analizza(testo){
+  const cap = []; let cur = {titolo:"", frasi:[]};
+  testo.split("\n").map(l => l.trim()).filter(Boolean).forEach(l => {
+    if (l.startsWith("##")) { if (cur.frasi.length || cur.titolo) cap.push(cur); cur = {titolo:l.replace(/^#+\s*/,""), frasi:[]}; }
+    else cur.frasi.push(l);
+  });
+  if (cur.frasi.length || cur.titolo) cap.push(cur);
+  return cap;
+}
+function parole(frase){
+  const out = [];
+  frase.replace(/[«»"“”]/g,"").split(/\s+/).filter(Boolean).forEach((raw, bi) => {
+    const testo = raw.replace(/[.,!?:;]+$/,"");
+    const punt = raw.slice(testo.length);
+    let [parola, resto] = testo.split("/");
+    let chiave = null, cat = resto || null;
+    if (parola.includes("=")) [parola, chiave] = parola.split("=");
+    const pezzi = parola.split("_");
+    // l'orco -> l' + orco
+    const tok = [];
+    pezzi.forEach(p => { const m = p.match(/^(l'|un'|dell'|nell'|all'|dall'|sull')(.+)$/i); if (m) tok.push(m[1], m[2]); else tok.push(p); });
+    tok.forEach((p, k) => out.push({
+      testo: p + (k === tok.length - 1 ? punt : ""),
+      lower: p.toLowerCase(),
+      base: bi, nBase: tok.length,
+      chiaveBase: chiave, catBase: cat,
+      art: ARTICOLI.has(p.toLowerCase())
+    }));
+  });
+  return out;
+}
+// Celle: unione automatica articolo+parola e celle di base, più unioni/separazioni dell'utente
+function gruppi(ps, mod, fkey){
+  const unite = new Set((mod.unioni || {})[fkey] || []);
+  const separate = new Set((mod.separate || {})[fkey] || []);
+  const out = []; let g = [];
+  ps.forEach((p, i) => {
+    g.push(i);
+    const next = ps[i + 1];
+    if (!next) { out.push(g); g = []; return; }
+    if (separate.has(i)) { out.push(g); g = []; return; }
+    const stessaBase = next.base === p.base;
+    const autoArt = p.art && !next.art && next.catBase !== "v" && !next.lower.match(/^(è|sono|ha|hanno|non)$/);
+    if (stessaBase || unite.has(i) || autoArt) return;
+    out.push(g); g = [];
+  });
+  return out;
+}
+function chiaveGruppo(ps, g){
+  // Prima una chiave annotata, poi l'ultima parola piena (non articolo)
+  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (p.chiaveBase) return {chiave:p.chiaveBase, cat:p.catBase}; }
+  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (!p.art) return {chiave:p.lower, cat:p.catBase}; }
+  const u = ps[g[g.length - 1]]; return {chiave:u.lower, cat:"x"};
+}
+function mostraImg(pic, id, alt){
+  pic.innerHTML = "";
+  if (!id) return;
+  const img = new Image(); img.alt = alt; img.src = IMG(id);
+  img.onerror = () => { pic.innerHTML = ""; };
+  pic.append(img);
+}
+
+/* ============ INTERFACCIA ============ */
+const $ = id => document.getElementById(id);
+const OPZ = "fiabe-caa-stampa";
+let opz = {pp:0, dim:110, ori:"portrait", cap:true, col:true, cen:false};
+try { Object.assign(opz, JSON.parse(localStorage.getItem(OPZ) || "{}")); } catch(e) {}
+const stilePagina = document.createElement("style"); document.head.append(stilePagina);
+function applicaOpz(){
+  document.documentElement.style.setProperty("--pic", opz.dim + "px");
+  document.documentElement.style.setProperty("--tf", (opz.dim >= 150 ? 1.6 : opz.dim >= 110 ? 1.25 : 1.05) + "rem");
+  document.documentElement.style.setProperty("--pp", opz.pp || 1);
+  document.body.classList.toggle("pp", opz.pp > 0);
+  document.body.classList.toggle("no-cap", !opz.cap);
+  document.body.classList.toggle("no-colori", !opz.col);
+  document.body.classList.toggle("centra", opz.cen);
+  stilePagina.textContent = `@media print{@page{size:A4 ${opz.ori};margin:12mm}}`;
+  $("oPP").value = opz.pp; $("oDim").value = opz.dim; $("oOri").value = opz.ori; $("oCap").checked = opz.cap; $("oCol").checked = opz.col; $("oCen").checked = opz.cen;
+  try { localStorage.setItem(OPZ, JSON.stringify(opz)); } catch(e) {}
+}
+$("oPP").onchange = e => { opz.pp = +e.target.value; impagina(); };
+$("oCap").onchange = e => { opz.cap = e.target.checked; impagina(); };
+$("oDim").onchange = e => { opz.dim = +e.target.value; applicaOpz(); };
+$("oOri").onchange = e => { opz.ori = e.target.value; applicaOpz(); };
+$("oCol").onchange = e => { opz.col = e.target.checked; applicaOpz(); };
+$("oCen").onchange = e => { opz.cen = e.target.checked; applicaOpz(); };
+$("bOpz").onclick = () => { const on = $("opz").hidden = !$("opz").hidden; $("bOpz").setAttribute("aria-pressed", !on); };
+const fiabaEl = $("fiaba"), lista = $("lista"), titolo = $("titolo"), testo = $("testo");
+let celle = [];
+const fiaba = () => stato.fiabe.find(f => f.id === stato.attiva);
+const hash = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
+
+function renderLista(){
+  lista.innerHTML = "";
+  const mie = stato.fiabe.filter(f => !f.id.startsWith("lib-")), lib = stato.fiabe.filter(f => f.id.startsWith("lib-"));
+  const blocco = (nome, arr) => {
+    if (!arr.length) return;
+    const g = document.createElement("div"); g.className = "grp"; g.textContent = nome; lista.append(g);
+    arr.forEach(f => { const b = document.createElement("button"); b.textContent = f.titolo || "Senza titolo"; b.className = f.id === stato.attiva ? "att" : ""; b.onclick = () => { stato.attiva = f.id; salva(); carica(); }; lista.append(b); });
+  };
+  blocco("Le mie fiabe", mie); blocco("Fiabe pronte", lib);
+}
+function carica(){
+  const f = fiaba(); titolo.value = f.titolo; testo.value = f.testo;
+  $("cop").textContent = "Pittogrammi ARASAAC (arasaac.org), autore Sergio Palao, licenza CC BY-NC-SA, Governo d'Aragona.";
+  renderLista(); render();
+}
+function render(){
+  const f = fiaba(); f.mod = f.mod || {scelte:{}, unioni:{}, separate:{}, cat:{}};
+  fiabaEl.innerHTML = ""; celle = [];
+  const cap = analizza(f.testo);
+  if (!cap.length) { fiabaEl.innerHTML = '<p class="vuoto-msg">Scrivi la fiaba qui sopra e premi "Crea le celle".</p>'; return; }
+  righe = [];
+  cap.forEach((c, ci) => {
+    c.frasi.forEach((fr, fi) => {
+      const fkey = hash(fr) + "-" + fi;
+      const ps = parole(fr);
+      const riga = document.createElement("div"); riga.className = "frase";
+      if (fi === 0 && c.titolo) riga.dataset.cap = c.titolo;
+      gruppi(ps, f.mod, fkey).forEach(g => {
+        const key = fkey + "-" + g[0] + "-" + g[g.length - 1];
+        const {chiave, cat} = chiaveGruppo(ps, g);
+        const label = g.map(i => ps[i].testo).join(" ").replace(/' /g,"'");
+        const w = document.createElement("div"); w.className = "w x"; w.tabIndex = 0;
+        const pic = document.createElement("div"); pic.className = "pic";
+        const lab = document.createElement("div"); lab.className = "t"; lab.textContent = label;
+        w.append(pic, lab); riga.append(w);
+        const cella = {key, fkey, ps, g, chiave, label, w, pic, idAuto:null, catAuto:"x"};
+        cella.applica = () => {
+          const catF = (f.mod.cat || {})[key] || cat || cella.catAuto || "x";
+          w.className = "w " + catF;
+          mostraImg(pic, key in f.mod.scelte ? f.mod.scelte[key] : cella.idAuto, label);
+        };
+        celle.push(cella);
+        trovaParola(chiave).then(r => { cella.idAuto = r.id; cella.catAuto = r.cat; cella.chiaveTrovata = r.chiave; cella.applica(); });
+        w.onclick = () => apri(cella);
+        w.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); apri(cella); } };
+      });
+      righe.push({riga, cap: fi === 0 ? c.titolo : ""});
+    });
+  });
+  impagina();
+}
+let righe = [];
+function impagina(){
+  fiabaEl.innerHTML = "";
+  if (!righe.length) return;
+  const f = fiaba();
+  if (!opz.pp) {
+    let sez = null;
+    righe.forEach(r => {
+      if (r.cap || !sez) { sez = document.createElement("section"); if (r.cap) { const h = document.createElement("h2"); h.textContent = r.cap; sez.append(h); } fiabaEl.append(sez); }
+      sez.append(r.riga);
+    });
+  } else {
+    for (let i = 0; i < righe.length; i += opz.pp) {
+      const pg = document.createElement("div"); pg.className = "pagina"; pg.style.setProperty("--n", opz.pp);
+      const testa = document.createElement("div"); testa.className = "testa"; testa.textContent = f.titolo; pg.append(testa);
+      righe.slice(i, i + opz.pp).forEach(r => { if (r.cap && opz.cap) { const h = document.createElement("div"); h.className = "capo"; h.textContent = r.cap; r.riga.prepend(h); } else { const h = r.riga.querySelector(".capo"); if (h) h.remove(); } pg.append(r.riga); });
+      fiabaEl.append(pg);
+    }
+  }
+  applicaOpz();
+}
+
+// Editor
+$("bGenera").onclick = () => { const f = fiaba(); f.testo = testo.value; salva(); render(); };
+testo.addEventListener("input", () => { const f = fiaba(); f.testo = testo.value; salva(); });
+titolo.addEventListener("input", () => { const f = fiaba(); f.titolo = titolo.value; salva(); renderLista(); });
+$("bNuova").onclick = () => {
+  const f = {id:"f-" + Date.now(), titolo:"Nuova fiaba", testo:"", mod:{}};
+  stato.fiabe.unshift(f); stato.attiva = f.id; salva(); carica(); titolo.focus(); titolo.select();
+};
+$("bDuplica").onclick = () => {
+  const o = fiaba(); const f = {id:"f-" + Date.now(), titolo:o.titolo + " (copia)", testo:o.testo, mod:JSON.parse(JSON.stringify(o.mod || {}))};
+  stato.fiabe.unshift(f); stato.attiva = f.id; salva(); carica();
+};
+$("bElimina").onclick = () => {
+  const f = fiaba();
+  if (f.id.startsWith("lib-")) { const l = LIBRERIA.find(x => x.id === f.id); f.testo = l.testo; f.titolo = l.titolo; f.mod = {}; salva(); carica(); return; }
+  if (stato.fiabe.length <= 1) return;
+  const b = $("bElimina");
+  if (b.dataset.conf !== "1") { b.dataset.conf = "1"; b.textContent = "Sicura? Clicca ancora"; setTimeout(() => { b.dataset.conf = ""; b.textContent = "Elimina fiaba"; }, 3000); return; }
+  b.dataset.conf = ""; b.textContent = "Elimina fiaba";
+  stato.fiabe = stato.fiabe.filter(x => x.id !== f.id); stato.attiva = stato.fiabe[0].id; salva(); carica();
+};
+$("bReset").onclick = () => { fiaba().mod = {}; salva(); render(); };
+$("bTesto").onclick = () => { const on = $("editor").hidden = !$("editor").hidden; $("bTesto").setAttribute("aria-pressed", !on); };
+$("bMaiu").onclick = () => { const on = document.body.classList.toggle("maiu"); $("bMaiu").setAttribute("aria-pressed", on); $("bMaiu").textContent = on ? "MAIUSCOLO" : "minuscolo"; };
+$("bStampa").onclick = () => window.print();
+
+// Salva/carica copia di tutte le fiabe (file .json)
+$("bEsporta").onclick = () => {
+  const blob = new Blob([JSON.stringify(stato, null, 1)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "fiabe-caa.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$("bImporta").onclick = () => $("fImporta").click();
+$("fImporta").onchange = async e => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const j = JSON.parse(await file.text());
+    if (!Array.isArray(j.fiabe)) throw 0;
+    for (const f of j.fiabe) { const i = stato.fiabe.findIndex(x => x.id === f.id); if (i >= 0) stato.fiabe[i] = f; else stato.fiabe.push(f); }
+    for (const m of (j.mie || [])) if (!stato.mie.some(x => x.id === m.id)) stato.mie.push(m);
+    stato.attiva = j.attiva || stato.attiva; salva(); carica();
+  } catch(err) { alert("Questo file non è una copia delle fiabe."); }
+  e.target.value = "";
+};
+
+// Finestra di modifica cella
+const dlg = $("dlg"), griglia = $("griglia"), iCerca = $("iCerca"), dTitolo = $("dTitolo"), bUnisci = $("bUnisci"), bSepara = $("bSepara");
+let corrente = null;
+async function riempi(chiave){
+  griglia.innerHTML = `<div class="stato">Cerco...</div>`;
+  let ids = chiave.startsWith("#") ? [{id:chiave.slice(1)}] : await ricerca(chiave);
+  if (!ids.length) for (const c of candidati(chiave).slice(1)) { ids = await ricerca(c); if (ids.length) break; }
+  if (!ids.length && !stato.mie.length) { griglia.innerHTML = `<div class="stato">Nessun pittogramma per questa parola. Prova con un sinonimo, al singolare, oppure carica una foto.</div>`; return; }
+  griglia.innerHTML = "";
+  const f = fiaba(), attuale = corrente.key in f.mod.scelte ? f.mod.scelte[corrente.key] : corrente.idAuto;
+  [...stato.mie.map(m => ({id:m.id})), ...ids].forEach(({id}) => {
+    const o = document.createElement("div"); o.className = "opt" + (String(id) === String(attuale) ? " sel" : "");
+    const img = new Image(); img.src = IMG(id); img.alt = ""; img.loading = "lazy"; o.append(img);
+    o.onclick = () => { f.mod.scelte[corrente.key] = id; salva(); corrente.applica(); dlg.close(); };
+    griglia.append(o);
+  });
+}
+function apri(cella){
+  corrente = cella;
+  const pulito = cella.label.replace(/[.,!?:;]+$/,"");
+  dTitolo.textContent = `Cella "${pulito}"`;
+  iCerca.value = cella.chiaveTrovata && !cella.chiaveTrovata.startsWith("#") ? cella.chiaveTrovata : pulito.toLowerCase();
+  bUnisci.disabled = cella.g[cella.g.length - 1] >= cella.ps.length - 1;
+  $("bUnisciSx").disabled = cella.g[0] === 0;
+  bSepara.disabled = cella.g.length < 2;
+  const catAtt = cella.w.className.replace("w ","");
+  document.querySelectorAll(".cat button").forEach(b => b.setAttribute("aria-pressed", b.dataset.cat === catAtt));
+  riempi(iCerca.value);
+  dlg.showModal();
+}
+$("fCerca").onsubmit = e => { e.preventDefault(); const q = iCerca.value.trim().toLowerCase(); if (q) riempi(q); };
+$("bNessuna").onclick = () => { const f = fiaba(); f.mod.scelte[corrente.key] = null; salva(); corrente.applica(); dlg.close(); };
+$("bChiudi").onclick = () => dlg.close();
+dlg.onclick = e => { if (e.target === dlg) dlg.close(); };
+document.querySelectorAll(".cat button").forEach(b => b.onclick = () => {
+  const f = fiaba(); f.mod.cat = f.mod.cat || {}; f.mod.cat[corrente.key] = b.dataset.cat; salva(); corrente.applica();
+  document.querySelectorAll(".cat button").forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+bUnisci.onclick = () => {
+  const f = fiaba(), c = corrente, ultimo = c.g[c.g.length - 1];
+  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
+  const u = new Set(f.mod.unioni[c.fkey] || []); u.add(ultimo); f.mod.unioni[c.fkey] = [...u];
+  const sp = new Set(f.mod.separate[c.fkey] || []); sp.delete(ultimo); f.mod.separate[c.fkey] = [...sp];
+  salva(); dlg.close(); render();
+};
+$("bUnisciSx").onclick = () => {
+  const f = fiaba(), c = corrente, prima = c.g[0] - 1;
+  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
+  const u = new Set(f.mod.unioni[c.fkey] || []); u.add(prima); f.mod.unioni[c.fkey] = [...u];
+  const sp = new Set(f.mod.separate[c.fkey] || []); sp.delete(prima); f.mod.separate[c.fkey] = [...sp];
+  salva(); dlg.close(); render();
+};
+$("bFoto").onclick = () => $("fFoto").click();
+$("fFoto").onchange = e => {
+  const file = e.target.files[0]; e.target.value = ""; if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const N = 300, c = document.createElement("canvas"); c.width = N; c.height = N;
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, N, N);
+    const k = Math.min(N / img.width, N / img.height), w = img.width * k, h = img.height * k;
+    x.drawImage(img, (N - w) / 2, (N - h) / 2, w, h);
+    URL.revokeObjectURL(img.src);
+    const m = {id:"u-" + Date.now().toString(36), data:c.toDataURL("image/jpeg", 0.82)};
+    stato.mie.push(m);
+    const f = fiaba(); f.mod.scelte[corrente.key] = m.id;
+    try { salva(); } catch(err) {}
+    corrente.applica(); dlg.close();
+  };
+  img.src = URL.createObjectURL(file);
+};
+bSepara.onclick = () => {
+  const f = fiaba(), c = corrente;
+  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
+  const u = new Set(f.mod.unioni[c.fkey] || []); c.g.forEach(i => u.delete(i)); f.mod.unioni[c.fkey] = [...u];
+  const sp = new Set(f.mod.separate[c.fkey] || []); c.g.slice(0, -1).forEach(i => sp.add(i)); f.mod.separate[c.fkey] = [...sp];
+  salva(); dlg.close(); render();
+};
+
+carica();
+applicaOpz();
+</script>
+</body>
+</html>
