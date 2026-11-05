@@ -6,121 +6,162 @@
 <title>Fiabe in CAA</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap">
 <style>
-/* Layout: barra laterale con la libreria delle fiabe, a destra il testo da scrivere e l'anteprima CAA. Cella CAA = pittogramma sopra, parola sotto, bordo colorato (chiave di Fitzgerald). In stampa resta solo la fiaba. */
+/* ------------------------------------------------------------------
+   Fiabe in CAA
+   Layout: barra laterale con le fiabe; al centro la fiaba in celle.
+   Cella CAA = pittogramma sopra, parola sotto, bordo colorato
+   (chiave di Fitzgerald). Modifica testo e stampa in finestre.
+------------------------------------------------------------------- */
 :root{
-  --bg:#fbfaf6; --fg:#1d1d1b; --muted:#6b6a64; --card:#ffffff; --line:#dedbd2; --pan:#f1eee6;
+  --bg:#fbfaf6; --fg:#1d1d1b; --muted:#6b6a64; --card:#fff; --line:#dedbd2; --pan:#f1eee6;
   --persona:#f2c400; --verbo:#2e9e4f; --nome:#ef7d1a; --agg:#2f7fd1; --funz:#9a978e;
+  --rosso:#c0392b; --ok:#2e9e4f;
   --font:"Andika","Comic Sans MS","Trebuchet MS",sans-serif;
+  --pic:110px; --tf:1.25rem;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px}
-button{font-family:var(--font);font-size:.95rem;padding:7px 12px;border-radius:10px;border:2px solid var(--fg);background:var(--card);color:var(--fg);cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.4}
+button{font-family:var(--font);font-size:1rem;padding:10px 16px;border-radius:12px;border:2px solid var(--fg);background:var(--card);color:var(--fg);cursor:pointer;min-height:44px}
 button.pri{background:var(--fg);color:var(--bg)}
-button.min{border-color:var(--line);font-size:.85rem;padding:5px 9px}
-button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+button.sec{border-color:var(--line)}
+button.pericolo{border-color:var(--rosso);color:var(--rosso)}
+button.pericolo.conf{background:var(--rosso);color:#fff}
+button.link{border:none;background:none;text-decoration:underline;color:var(--muted);padding:6px 4px;min-height:0}
 button:disabled{opacity:.4;cursor:default}
-button:focus-visible,.w:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--agg);outline-offset:2px}
-input,textarea{font-family:var(--font);font-size:1rem;border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card);color:var(--fg)}
+button:focus-visible,.w:focus-visible,input:focus-visible,textarea:focus-visible,.scelta:focus-visible{outline:3px solid var(--agg);outline-offset:2px}
+input,textarea{font-family:var(--font);font-size:1.05rem;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card);color:var(--fg)}
+h1,h2,h3{line-height:1.15;margin:0}
 
-.app{display:grid;grid-template-columns:260px 1fr;min-height:100%}
-aside{background:var(--pan);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:12px}
-aside h1{font-size:1.5rem;margin:0;line-height:1.1}
-aside .sub{color:var(--muted);font-size:.85rem;margin:0}
+/* Struttura */
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100%}
+aside{background:var(--pan);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:14px}
+aside h1{font-size:1.5rem}
+aside .sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
 .lista{display:flex;flex-direction:column;gap:4px;overflow:auto;flex:1}
-.lista button{text-align:left;border:2px solid transparent;background:transparent;padding:7px 10px;border-radius:8px}
+.lista .grp{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px 4px}
+.lista .grp:first-child{margin-top:0}
+.lista button{text-align:left;border:2px solid transparent;background:transparent;padding:9px 12px;border-radius:10px;min-height:0}
 .lista button:hover{background:var(--card)}
 .lista button.att{background:var(--card);border-color:var(--fg)}
-.lista .grp{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px 4px}
-.lista .grp:first-child{margin-top:0}
-.aside-azioni{display:flex;flex-direction:column;gap:6px}
-.aside-azioni .riga{display:flex;gap:6px;flex-wrap:wrap}
+.avviso{background:#fff6d6;border:1px solid #e9d78a;border-radius:12px;padding:10px 12px;font-size:.9rem}
+.avviso button{margin-top:8px;width:100%}
+.piede{display:flex;flex-direction:column;gap:6px}
 .credits{font-size:.72rem;color:var(--muted);line-height:1.4;margin:0}
 
 main{padding-block:18px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-width:0}
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
-.top input#titolo{font-size:1.6rem;font-weight:700;flex:1;min-width:200px;border-color:transparent;background:transparent;padding-left:4px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:6px}
+.top input#titolo{font-size:1.8rem;font-weight:700;flex:1;min-width:200px;border-color:transparent;background:transparent;padding:4px 8px}
 .top input#titolo:hover,.top input#titolo:focus{border-color:var(--line);background:var(--card)}
 .top .sx{display:flex;gap:8px;flex-wrap:wrap}
-.editor{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;background:var(--pan);padding:14px;border-radius:14px}
-.editor textarea{width:100%;min-height:200px;line-height:1.5;resize:vertical}
-.editor .aiuto{font-size:.88rem;color:var(--muted);line-height:1.5;margin:0}
-.editor .aiuto code{background:var(--card);padding:1px 5px;border-radius:5px}
-.editor .riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:6px 0 4px;color:var(--muted);font-size:.9rem}
+.stato-img{font-size:.9rem;color:var(--muted);min-height:1.4em;margin:0 0 8px 8px}
+.stato-img:empty{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:4px 8px 10px;color:var(--muted);font-size:.85rem}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:14px;height:14px;border-radius:4px;border:3px solid;display:inline-block}
-.hint{color:var(--muted);font-size:.9rem;margin:0 0 6px}
 
-.fiaba h2{font-size:1.6rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:3px solid var(--fg)}
+/* Fiaba in celle */
+.fiaba h2{font-size:1.5rem;margin:28px 0 8px;padding-bottom:6px;border-bottom:3px solid var(--fg)}
 .frase{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--line)}
-.w{display:flex;flex-direction:column;align-items:center;min-width:112px;max-width:230px;padding:6px;border:4px solid var(--funz);border-radius:12px;background:var(--card);cursor:pointer;position:relative;transition:transform .1s}
-.w:hover{transform:scale(1.04);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.w{display:flex;flex-direction:column;align-items:center;min-width:calc(var(--pic) + 20px);max-width:240px;padding:6px;border:4px solid var(--funz);border-radius:12px;background:var(--card);cursor:pointer;transition:transform .1s,box-shadow .1s}
+.w:hover{transform:scale(1.03);box-shadow:0 3px 10px rgba(0,0,0,.12)}
 .w.p{border-color:var(--persona)} .w.v{border-color:var(--verbo)} .w.n{border-color:var(--nome)} .w.a{border-color:var(--agg)}
-:root{--pic:96px;--tf:1.25rem}
+.w.lampo{animation:lampo .8s}
+@keyframes lampo{0%,100%{box-shadow:none}40%{box-shadow:0 0 0 6px rgba(46,158,79,.45)}}
 .pic{width:var(--pic);height:var(--pic);display:flex;align-items:center;justify-content:center}
 .pic img{width:var(--pic);height:var(--pic);object-fit:contain}
-.w{min-width:calc(var(--pic) + 20px)}
 .t{font-size:var(--tf);font-weight:700;margin-top:4px;text-align:center;line-height:1.15}
 body.maiu .t{text-transform:uppercase}
-.vuoto-msg{color:var(--muted);padding:30px 0}
-.pagina{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:14px 0;background:var(--card)}
+.vuoto{color:var(--muted);padding:40px 0;text-align:center}
+.vuoto button{margin-top:12px}
+.pagina{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:14px 0;background:var(--card)}
 .pagina .testa{font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .pagina .frase{border-bottom:none}
 .pagina .frase + .frase{border-top:1px dashed var(--line)}
 .capo{flex-basis:100%;font-size:1.1rem;font-weight:700;color:var(--muted)}
-.stampa-opz{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
-.stampa-opz label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
-.stampa-opz select{font-family:var(--font);font-size:1rem;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg)}
-.stampa-opz .chk{flex-direction:row;align-items:center;gap:8px;align-self:end;padding-bottom:6px}
-.cop{display:none}
+body.no-colori .w{border-color:#333!important}
+body.centra .frase{justify-content:center}
 
-/* Finestra di modifica cella */
-dialog{border:none;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--fg);font-family:var(--font)}
+/* Finestre */
+dialog{border:none;border-radius:18px;padding:0;max-width:760px;width:calc(100% - 32px);background:var(--card);color:var(--fg);font-family:var(--font);max-height:92vh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.45)}
-.dlg{padding:20px}
-.dlg h3{margin:0 0 4px;font-size:1.4rem}
-.dlg p{margin:0 0 12px;color:var(--muted)}
+.dlg{padding:22px}
+.dlg h3{font-size:1.4rem;margin-bottom:4px}
+.dlg .sotto{color:var(--muted);margin:0 0 14px}
+.azioni{display:flex;justify-content:space-between;gap:8px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.azioni .gr{display:flex;gap:8px;flex-wrap:wrap}
+.schede{display:flex;gap:6px;border-bottom:2px solid var(--line);margin-bottom:14px}
+.schede button{border:none;border-bottom:4px solid transparent;border-radius:0;background:none;padding:8px 14px;font-size:1.05rem;min-height:0}
+.schede button[aria-selected="true"]{border-bottom-color:var(--fg);font-weight:700}
+.scheda[hidden]{display:none}
+
+/* Scelta immagine */
 .cerca{display:flex;gap:8px;margin-bottom:10px}
 .cerca input{flex:1;min-width:0}
-.cat{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;font-size:.9rem;color:var(--muted)}
-.cat button{padding:4px 10px;font-size:.85rem;border-width:3px}
-.cat button.p{border-color:var(--persona)} .cat button.v{border-color:var(--verbo)} .cat button.n{border-color:var(--nome)} .cat button.a{border-color:var(--agg)} .cat button.x{border-color:var(--funz)}
-.cat button[aria-pressed="true"]{background:var(--pan);color:var(--fg)}
-.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:42vh;overflow:auto;padding:2px}
-.opt{border:3px solid transparent;border-radius:10px;padding:4px;background:#f3f1ea;cursor:pointer;display:flex;align-items:center;justify-content:center;aspect-ratio:1}
+.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;max-height:40vh;overflow:auto;padding:2px}
+.opt{border:3px solid transparent;border-radius:12px;padding:4px;background:#f3f1ea;cursor:pointer;display:flex;align-items:center;justify-content:center;aspect-ratio:1}
 .opt img{width:100%;height:100%;object-fit:contain}
 .opt:hover{border-color:var(--agg)}
-.opt.sel{border-color:var(--verbo);background:#e4f5e9}
-.stato{color:var(--muted);padding:12px;text-align:center}
-.azioni{display:flex;justify-content:space-between;gap:8px;margin-top:14px;flex-wrap:wrap}
-.azioni .gr{display:flex;gap:8px;flex-wrap:wrap}
+.opt.sel{border-color:var(--ok);background:#e4f5e9}
+.stato{color:var(--muted);padding:14px;text-align:center;grid-column:1/-1}
 
-@media (max-width:760px){.app{grid-template-columns:1fr}aside{border-right:none;border-bottom:1px solid var(--line)}.lista{max-height:180px}}
+/* Parole e colori */
+.blocco{margin-bottom:18px}
+.blocco h4{margin:0 0 8px;font-size:1rem;color:var(--muted);font-weight:400}
+.colori{display:flex;gap:8px;flex-wrap:wrap}
+.colori button{border-width:4px;min-width:110px}
+.colori .p{border-color:var(--persona)} .colori .v{border-color:var(--verbo)} .colori .n{border-color:var(--nome)} .colori .a{border-color:var(--agg)} .colori .x{border-color:var(--funz)}
+.colori button[aria-pressed="true"]{background:var(--pan);font-weight:700}
 
+/* Scelte grandi (stampa) */
+.scelte{display:flex;gap:8px;flex-wrap:wrap}
+.scelta{border:2px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;background:var(--card);min-width:72px;text-align:center;font-size:1rem;min-height:44px}
+.scelta[aria-pressed="true"]{border-color:var(--fg);background:var(--fg);color:var(--bg)}
+.spunte{display:flex;gap:8px;flex-wrap:wrap}
+.spunta{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;font-size:1rem}
+.spunta input{width:20px;height:20px;margin:0}
+.conteggio{color:var(--muted);margin:8px 0 0}
+
+/* Editor testo */
+textarea#testo{width:100%;min-height:300px;line-height:1.6;resize:vertical;font-size:1.1rem}
+.suggerimento{background:var(--pan);border-radius:12px;padding:10px 14px;font-size:.95rem;color:var(--muted);margin:0 0 10px}
+.suggerimento b{color:var(--fg)}
+
+/* Toast e benvenuto */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:50;max-width:calc(100% - 32px)}
+.toast button{background:transparent;color:var(--bg);border-color:var(--bg);min-height:0;padding:6px 12px}
+.toast[hidden]{display:none}
+.benvenuto{text-align:center;padding:10px 6px}
+.benvenuto h3{font-size:1.8rem;margin-bottom:12px}
+.benvenuto ol{text-align:left;max-width:460px;margin:0 auto 18px;font-size:1.1rem;line-height:1.6;padding-left:26px}
+.benvenuto button{font-size:1.2rem;padding:12px 28px}
+
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  aside{border-right:none;border-bottom:1px solid var(--line)}
+  .lista{max-height:200px}
+}
+
+/* Stampa */
 @media print{
-  @page{size:A4;margin:14mm}
+  @page{size:A4;margin:12mm}
   body{background:#fff}
-  aside,.top .sx,.editor,.hint,.legend,dialog{display:none!important}
+  aside,.top .sx,.stato-img,.legend,dialog,.toast{display:none!important}
   .app{display:block}
   main{padding:0}
   .top input#titolo{border:none;background:transparent;font-size:2.2rem;padding:0}
-  .cop{display:block;font-size:.8rem;color:#777;margin:0 0 8px}
-  .stampa-opz,.frase.fine-pagina::after{display:none!important}
   .fiaba h2{break-before:page;margin-top:0}
   .fiaba section:first-of-type h2{break-before:auto}
   body.no-cap .fiaba h2{display:none}
   .frase{break-inside:avoid;border-bottom-color:#ccc}
-  body.pp .top,body.pp .cop{display:none}
+  .w{break-inside:avoid;transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.pp .top{display:none}
   .pagina{height:calc(100vh - 2px);break-after:page;break-inside:avoid;display:grid;grid-template-rows:auto repeat(var(--n),1fr);border:none;border-radius:0;padding:0;margin:0;background:#fff}
   .pagina:last-child{break-after:auto}
   .pagina .testa{font-size:.8rem;color:#777;padding-bottom:2mm;border-bottom:1px solid #ccc}
   .pagina .frase{align-content:flex-start;overflow:hidden;padding:4mm 0;border-top:none}
   .pagina .frase + .frase{border-top:1px dashed #bbb}
   .capo{color:#555}
-  body.no-colori .w{border-color:#333!important}
-  body.centra .frase{justify-content:center}
-  .w{break-inside:avoid;transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
@@ -129,207 +170,258 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <aside>
   <div>
     <h1>Fiabe in CAA</h1>
-    <p class="sub">Comunicazione Aumentativa e Alternativa, con i pittogrammi ARASAAC</p>
+    <p class="sub">Fiabe con i pittogrammi ARASAAC, da leggere e stampare</p>
   </div>
+  <button class="pri" id="bNuova">+ Nuova fiaba</button>
   <div class="lista" id="lista"></div>
-  <div class="aside-azioni">
-    <button class="pri" id="bNuova">+ Nuova fiaba</button>
-    <div class="riga">
-      <button class="min" id="bEsporta">Salva copia</button>
-      <button class="min" id="bImporta">Carica copia</button>
-      <input type="file" id="fImporta" accept="application/json" hidden>
-    </div>
+  <div class="avviso" id="avviso" hidden>
+    Le tue fiabe sono salvate solo su questo dispositivo. Scaricale ogni tanto per non perderle.
+    <button class="sec" id="bScaricaAvviso">Scarica le mie fiabe</button>
   </div>
-  <p class="credits">Pittogrammi: Sergio Palao. Origine: ARASAAC (arasaac.org). Licenza CC BY-NC-SA. Proprietà: Governo d'Aragona (Spagna). Serve la connessione internet per vedere i pittogrammi.</p>
+  <div class="piede">
+    <button class="sec" id="bEsporta">Scarica le mie fiabe</button>
+    <button class="sec" id="bImporta">Apri un file di fiabe</button>
+    <input type="file" id="fImporta" accept="application/json" hidden>
+    <p class="credits">Pittogrammi: Sergio Palao, ARASAAC (arasaac.org), licenza CC BY-NC-SA, Governo d'Aragona. Serve internet per vedere le immagini.</p>
+  </div>
 </aside>
 
 <main>
   <div class="top">
     <input id="titolo" aria-label="Titolo della fiaba" placeholder="Titolo della fiaba">
     <div class="sx">
-      <button id="bTesto" aria-pressed="true">Testo</button>
-      <button id="bOpz" aria-pressed="true">Stampa: opzioni</button>
-      <button id="bMaiu" aria-pressed="true">MAIUSCOLO</button>
+      <button id="bModifica">Modifica il testo</button>
+      <button id="bMaiu" class="sec" aria-pressed="true">MAIUSCOLO</button>
       <button id="bStampa" class="pri">Stampa</button>
     </div>
   </div>
-  <p class="cop" id="cop"></p>
-
-  <div class="editor" id="editor">
-    <p class="aiuto">Scrivi la fiaba con <strong>frasi brevi, una per riga</strong> (soggetto, verbo, oggetto). Per iniziare un capitolo scrivi <code>## Titolo del capitolo</code>. Gli articoli si uniscono da soli alla parola che segue. Dopo, clicca su una cella per cambiare il pittogramma o caricare una foto tua, cambiare il colore, unire o separare le parole.</p>
-    <textarea id="testo" spellcheck="false" placeholder="## La famiglia&#10;C'è un bambino.&#10;Il bambino è piccolo."></textarea>
-    <div class="riga">
-      <button class="pri" id="bGenera">Crea le celle</button>
-      <button id="bDuplica">Duplica fiaba</button>
-      <button id="bReset">Ripristina celle</button>
-      <button id="bElimina">Elimina fiaba</button>
-    </div>
-  </div>
-
-  <div class="stampa-opz" id="opz">
-    <label>Frasi per foglio A4
-      <select id="oPP"><option value="0">Di seguito (tante quante entrano)</option><option value="1">1 frase per foglio</option><option value="2">2 frasi per foglio</option><option value="3">3 frasi per foglio</option><option value="4">4 frasi per foglio</option><option value="5">5 frasi per foglio</option><option value="6">6 frasi per foglio</option></select>
-    </label>
-    <label>Dimensione celle
-      <select id="oDim"><option value="80">Piccole</option><option value="110" selected>Medie</option><option value="150">Grandi</option><option value="200">Molto grandi</option></select>
-    </label>
-    <label>Foglio
-      <select id="oOri"><option value="portrait">Verticale</option><option value="landscape">Orizzontale</option></select>
-    </label>
-    <label class="chk"><input type="checkbox" id="oCap" checked> Titoli dei capitoli</label>
-    <label class="chk"><input type="checkbox" id="oCol" checked> Bordi colorati</label>
-    <label class="chk"><input type="checkbox" id="oCen"> Frasi centrate</label>
-  </div>
+  <p class="stato-img" id="statoImg"></p>
   <div class="legend">
     <span><i style="border-color:var(--persona)"></i>Persone e animali</span>
     <span><i style="border-color:var(--verbo)"></i>Azioni</span>
     <span><i style="border-color:var(--nome)"></i>Cose e luoghi</span>
     <span><i style="border-color:var(--agg)"></i>Come sono</span>
     <span><i style="border-color:var(--funz)"></i>Altre parole</span>
+    <span>Clicca una cella per cambiarla</span>
   </div>
-  <p class="hint">Clicca su una cella per modificarla. Le modifiche si salvano da sole su questo computer.</p>
   <div class="fiaba" id="fiaba"></div>
 </main>
 </div>
 
-<dialog id="dlg">
+<!-- Finestra: modifica testo -->
+<dialog id="dEditor">
   <div class="dlg">
-    <h3 id="dTitolo">Cella</h3>
-    <p>Clicca un'immagine per sceglierla, cerca un'altra parola (al singolare, verbi all'infinito) oppure carica una foto tua.</p>
-    <form class="cerca" id="fCerca">
-      <input id="iCerca" type="search" placeholder="Cerca una parola..." autocomplete="off">
-      <button type="submit">Cerca</button>
-    </form>
-    <div class="cat">Colore:
-      <button type="button" class="p" data-cat="p">Persona</button>
-      <button type="button" class="v" data-cat="v">Azione</button>
-      <button type="button" class="n" data-cat="n">Cosa</button>
-      <button type="button" class="a" data-cat="a">Com'è</button>
-      <button type="button" class="x" data-cat="x">Altro</button>
-    </div>
-    <div class="griglia" id="griglia"></div>
+    <h3>Modifica il testo</h3>
+    <p class="suggerimento"><b>Una frase per riga</b>, corta e semplice (chi, fa cosa, cosa). Per iniziare un capitolo scrivi <b>## Nome del capitolo</b>. Le immagini si trovano da sole.</p>
+    <textarea id="testo" spellcheck="false" placeholder="## La famiglia&#10;C'è un bambino.&#10;Il bambino è piccolo."></textarea>
     <div class="azioni">
       <div class="gr">
-        <button type="button" id="bUnisciSx">◀ Unisci a sinistra</button>
-        <button type="button" id="bUnisci">Unisci a destra ▶</button>
-        <button type="button" id="bSepara">Separa</button>
-        <button type="button" id="bFoto">Carica una foto</button>
-        <input type="file" id="fFoto" accept="image/*" hidden>
-        <button type="button" id="bNessuna">Senza immagine</button>
+        <button class="sec" id="bDuplica">Fai una copia</button>
+        <button class="sec" id="bRipristina">Torna all'inizio</button>
+        <button class="pericolo" id="bElimina">Elimina questa fiaba</button>
       </div>
-      <button type="button" id="bChiudi">Chiudi</button>
+      <button class="pri" id="bFatto">Fatto</button>
     </div>
   </div>
 </dialog>
 
+<!-- Finestra: stampa -->
+<dialog id="dStampa">
+  <div class="dlg">
+    <h3>Stampa</h3>
+    <p class="sotto">Scegli come disporre la fiaba sui fogli A4.</p>
+    <div class="blocco"><h4>Frasi per foglio</h4>
+      <div class="scelte" id="sPP">
+        <button class="scelta" data-v="0">Di seguito</button><button class="scelta" data-v="1">1</button><button class="scelta" data-v="2">2</button><button class="scelta" data-v="3">3</button><button class="scelta" data-v="4">4</button><button class="scelta" data-v="6">6</button>
+      </div></div>
+    <div class="blocco"><h4>Dimensione delle celle</h4>
+      <div class="scelte" id="sDim">
+        <button class="scelta" data-v="80">Piccole</button><button class="scelta" data-v="110">Medie</button><button class="scelta" data-v="150">Grandi</button><button class="scelta" data-v="200">Molto grandi</button>
+      </div></div>
+    <div class="blocco"><h4>Foglio</h4>
+      <div class="scelte" id="sOri">
+        <button class="scelta" data-v="portrait">Verticale</button><button class="scelta" data-v="landscape">Orizzontale</button>
+      </div></div>
+    <div class="blocco"><h4>Altro</h4>
+      <div class="spunte">
+        <label class="spunta"><input type="checkbox" id="oCap"> Titoli dei capitoli</label>
+        <label class="spunta"><input type="checkbox" id="oCol"> Bordi colorati</label>
+        <label class="spunta"><input type="checkbox" id="oCen"> Frasi centrate</label>
+      </div></div>
+    <p class="conteggio" id="conteggio"></p>
+    <div class="azioni">
+      <button class="sec" id="bChiudiStampa">Chiudi</button>
+      <button class="pri" id="bStampaOra">Stampa adesso</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Finestra: modifica cella -->
+<dialog id="dCella">
+  <div class="dlg">
+    <h3 id="cTitolo">Cella</h3>
+    <div class="schede" role="tablist">
+      <button role="tab" id="tImg" aria-selected="true">Immagine</button>
+      <button role="tab" id="tPar" aria-selected="false">Parole e colore</button>
+    </div>
+    <div class="scheda" id="sImg">
+      <form class="cerca" id="fCerca">
+        <input id="iCerca" type="search" placeholder="Cerca un'altra parola..." autocomplete="off">
+        <button type="submit">Cerca</button>
+      </form>
+      <div class="griglia" id="griglia"></div>
+      <div class="azioni">
+        <div class="gr">
+          <button id="bFoto">Carica una foto</button>
+          <input type="file" id="fFoto" accept="image/*" hidden>
+          <button class="link" id="bNessuna">Lascia senza immagine</button>
+        </div>
+        <button class="sec" id="bChiudiCella">Chiudi</button>
+      </div>
+    </div>
+    <div class="scheda" id="sPar" hidden>
+      <div class="blocco"><h4>Unire o separare le parole</h4>
+        <div class="gr scelte">
+          <button id="bUnisciSx">◀ Unisci con la parola prima</button>
+          <button id="bUnisciDx">Unisci con la parola dopo ▶</button>
+          <button id="bSepara">Separa le parole</button>
+        </div></div>
+      <div class="blocco"><h4>Colore del bordo</h4>
+        <div class="colori">
+          <button class="p" data-cat="p">Persona</button>
+          <button class="v" data-cat="v">Azione</button>
+          <button class="n" data-cat="n">Cosa</button>
+          <button class="a" data-cat="a">Com'è</button>
+          <button class="x" data-cat="x">Altro</button>
+        </div></div>
+      <div class="azioni"><span></span><button class="sec" id="bChiudiCella2">Chiudi</button></div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Finestra: benvenuto -->
+<dialog id="dBenvenuto">
+  <div class="dlg benvenuto">
+    <h3>Benvenuta!</h3>
+    <ol>
+      <li>Scegli una fiaba a sinistra, oppure scrivine una nuova.</li>
+      <li>Clicca una cella per cambiare immagine, unire parole o colore.</li>
+      <li>Premi <b>Stampa</b> e scegli quante frasi per foglio.</li>
+    </ol>
+    <button class="pri" id="bInizia">Inizia</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" hidden><span id="toastTesto"></span><button id="bAnnulla">Annulla</button></div>
+
 <script>
-/* ============ LIBRERIA DI FIABE ============
-   Testo semplice: una frase per riga, "## " apre un capitolo.
-   Annotazione facoltativa: parola=chiave|alternativa/categoria  (categorie: p v n a x)
-   Underscore unisce parole in una cella: Cappuccetto_Rosso                 */
+"use strict";
+/* ================================================================
+   1. LIBRERIA DI FIABE (testo pulito: una frase per riga, "## " capitolo)
+================================================================ */
 const LIBRERIA = [
 {id:"lib-pollicino", titolo:"Pollicino", testo:`## La famiglia
 C'è un bambino.
 Il bambino è piccolo.
-Si_chiama=chiamarsi|nome/v Pollicino=#7176/p.
-Pollicino=#7176/p ha sei fratelli.
+Si chiama Pollicino.
+Pollicino ha sei fratelli.
 La famiglia è povera.
 Non c'è cibo.
 ## Il bosco
 Papà porta i bambini nel bosco.
-Pollicino=#7176/p prende i sassi bianchi.
-Pollicino=#7176/p butta i sassi per_terra=terra/n.
-Papà va_via=andare via|andare/v.
+Pollicino prende i sassi bianchi.
+Pollicino butta i sassi per terra.
+Papà va via.
 I bambini sono soli.
-Pollicino=#7176/p guarda i sassi.
+Pollicino guarda i sassi.
 I bambini seguono i sassi.
 I bambini tornano a casa.
 La mamma è contenta.
 ## Le briciole
 Papà porta i bambini nel bosco.
-Pollicino=#7176/p ha il pane.
-Pollicino=#7176/p butta le briciole per_terra=terra/n.
+Pollicino ha il pane.
+Pollicino butta le briciole per terra.
 Gli uccellini mangiano le briciole.
-Pollicino=#7176/p non trova la strada.
+Pollicino non trova la strada.
 I bambini hanno paura.
 ## L'orco
 I bambini vedono una casa.
 Nella casa c'è un orco.
 L'orco è grande e cattivo.
 I bambini dormono.
-Pollicino=#7176/p è furbo.
-Pollicino=#7176/p sveglia i fratelli.
+Pollicino è furbo.
+Pollicino sveglia i fratelli.
 I bambini scappano.
 ## Gli stivali
 L'orco corre.
 L'orco è stanco.
 L'orco dorme.
-Pollicino=#7176/p prende gli stivali magici=magia|mago/a.
+Pollicino prende gli stivali magici.
 Gli stivali fanno passi grandi.
-Pollicino=#7176/p corre veloce.
+Pollicino corre veloce.
 ## La fine
-Pollicino=#7176/p torna a casa.
-Pollicino=#7176/p porta tanti soldi.
+Pollicino torna a casa.
+Pollicino porta tanti soldi.
 La famiglia mangia.
 Tutti sono felici.
 Fine.`},
 {id:"lib-cappuccetto", titolo:"Cappuccetto Rosso", testo:`## La mamma
 C'è una bambina.
-Si_chiama=chiamarsi|nome/v Cappuccetto_Rosso=cappuccetto rosso|bambina/p.
+Si chiama Cappuccetto Rosso.
 La mamma dà un cestino.
 Nel cestino c'è la torta.
 La torta è per la nonna.
 La nonna è malata.
 ## Il bosco
-Cappuccetto_Rosso=cappuccetto rosso|bambina/p va nel bosco.
+Cappuccetto Rosso va nel bosco.
 Nel bosco c'è il lupo.
 Il lupo è furbo.
 Il lupo chiede: "Dove vai?"
-Cappuccetto_Rosso=cappuccetto rosso|bambina/p dice: "Vado dalla nonna."
+Cappuccetto Rosso dice: "Vado dalla nonna."
 Il lupo corre dalla nonna.
 ## La casa della nonna
 Il lupo mangia la nonna.
-Il lupo si_mette=mettere/v a letto.
-Cappuccetto_Rosso=cappuccetto rosso|bambina/p arriva.
+Il lupo si mette a letto.
+Cappuccetto Rosso arriva.
 "Nonna, che occhi grandi!"
 "Nonna, che orecchie grandi!"
 "Nonna, che bocca grande!"
 Il lupo salta.
-Il lupo mangia Cappuccetto_Rosso=cappuccetto rosso|bambina/p.
+Il lupo mangia Cappuccetto Rosso.
 ## Il cacciatore
 Arriva il cacciatore.
 Il cacciatore apre la pancia del lupo.
 La nonna esce.
-Cappuccetto_Rosso=cappuccetto rosso|bambina/p esce.
+Cappuccetto Rosso esce.
 Tutti sono salvi.
 Il lupo scappa via.
 Fine.`},
 {id:"lib-porcellini", titolo:"I tre porcellini", testo:`## Tre fratelli
-Ci_sono=essere/v tre porcellini=maiale/p.
-I porcellini=maiale/p sono fratelli.
-Ogni porcellino=maiale/p costruisce una casa.
+Ci sono tre porcellini.
+I porcellini sono fratelli.
+Ogni porcellino costruisce una casa.
 ## Le tre case
-Il primo porcellino=maiale/p fa una casa di paglia.
-Il secondo porcellino=maiale/p fa una casa di legno.
-Il terzo porcellino=maiale/p fa una casa di mattoni.
+Il primo porcellino fa una casa di paglia.
+Il secondo porcellino fa una casa di legno.
+Il terzo porcellino fa una casa di mattoni.
 La casa di mattoni è forte.
 ## Il lupo
 Arriva il lupo.
 Il lupo ha fame.
 Il lupo soffia sulla casa di paglia.
 La casa cade.
-Il porcellino=maiale/p scappa.
+Il porcellino scappa.
 Il lupo soffia sulla casa di legno.
 La casa cade.
-I porcellini=maiale/p scappano.
+I porcellini scappano.
 ## La casa di mattoni
 Il lupo soffia sulla casa di mattoni.
 La casa non cade.
 Il lupo entra dal camino.
 Nel camino c'è il fuoco.
-Il lupo si_scotta=bruciare/v.
+Il lupo si scotta.
 Il lupo scappa via.
-I tre porcellini=maiale/p sono salvi.
+I tre porcellini sono salvi.
 Fine.`},
 {id:"lib-riccioli", titolo:"Riccioli d'oro e i tre orsi", testo:`## I tre orsi
 Nel bosco c'è una casa.
@@ -340,10 +432,10 @@ L'orsetto è piccolo.
 Gli orsi vanno a passeggio.
 ## La bambina
 Arriva una bambina.
-Si_chiama=chiamarsi|nome/v Riccioli_d'oro=bambina/p.
+Si chiama Riccioli d'oro.
 La bambina entra nella casa.
 ## La zuppa
-Sul tavolo ci_sono=essere/v tre ciotole.
+Sul tavolo ci sono tre ciotole.
 La bambina assaggia la zuppa grande.
 È troppo calda.
 La bambina assaggia la zuppa media.
@@ -352,10 +444,10 @@ La bambina assaggia la zuppa piccola.
 È buona.
 La bambina mangia tutto.
 ## Le sedie
-La bambina si_siede=sedersi/v sulla sedia grande.
+La bambina si siede sulla sedia grande.
 È troppo dura.
-La bambina si_siede=sedersi/v sulla sedia piccola.
-La sedia si_rompe=rompere/v.
+La bambina si siede sulla sedia piccola.
+La sedia si rompe.
 ## I letti
 La bambina è stanca.
 La bambina dorme nel letto piccolo.
@@ -364,21 +456,21 @@ Gli orsi tornano a casa.
 "Chi ha mangiato la mia zuppa?"
 "Chi ha rotto la mia sedia?"
 "Chi dorme nel mio letto?"
-La bambina si_sveglia=svegliarsi/v.
+La bambina si sveglia.
 La bambina ha paura.
 La bambina scappa a casa.
 Fine.`},
 {id:"lib-anatroccolo", titolo:"Il brutto anatroccolo", testo:`## Le uova
 Mamma anatra ha sei uova.
-Le uova si_aprono=aprire/v.
+Le uova si aprono.
 Nascono cinque anatroccoli gialli.
 L'ultimo anatroccolo è grigio.
 L'anatroccolo grigio è grande.
 ## Nessuno lo vuole
 Gli altri anatroccoli ridono.
-Le galline lo_beccano=beccare/v.
+Le galline lo beccano.
 L'anatroccolo è triste.
-L'anatroccolo va_via=andare via|andare/v.
+L'anatroccolo va via.
 ## L'inverno
 Arriva l'inverno.
 Fa freddo.
@@ -390,65 +482,65 @@ L'anatroccolo guarda nell'acqua.
 Vede un cigno bianco.
 Il cigno è lui!
 L'anatroccolo è un cigno.
-I cigni lo_accolgono=abbracciare/v.
+I cigni lo abbracciano.
 Il cigno è felice.
 Fine.`},
 {id:"lib-cenerentola", titolo:"Cenerentola", testo:`## La casa
 C'è una ragazza.
-Si_chiama=chiamarsi|nome/v Cenerentola=cenerentola|ragazza/p.
-Cenerentola=cenerentola|ragazza/p è buona.
+Si chiama Cenerentola.
+Cenerentola è buona.
 La matrigna è cattiva.
 Le sorellastre sono cattive.
-Cenerentola=cenerentola|ragazza/p pulisce la casa.
-Cenerentola=cenerentola|ragazza/p lava i piatti.
+Cenerentola pulisce la casa.
+Cenerentola lava i piatti.
 ## La festa
 Il principe fa una festa.
 Le sorellastre vanno alla festa.
-Cenerentola=cenerentola|ragazza/p resta a casa.
-Cenerentola=cenerentola|ragazza/p piange.
+Cenerentola resta a casa.
+Cenerentola piange.
 ## La fata
 Arriva la fata.
 La fata fa una magia.
-Cenerentola=cenerentola|ragazza/p ha un vestito bellissimo.
-Cenerentola=cenerentola|ragazza/p ha le scarpette di vetro.
+Cenerentola ha un vestito bellissimo.
+Cenerentola ha le scarpette di vetro.
 La fata dice: "Torna a mezzanotte!"
 ## Il ballo
-Cenerentola=cenerentola|ragazza/p va alla festa.
-Il principe balla con Cenerentola=cenerentola|ragazza/p.
+Cenerentola va alla festa.
+Il principe balla con Cenerentola.
 Suona la mezzanotte.
-Cenerentola=cenerentola|ragazza/p scappa.
-Cenerentola=cenerentola|ragazza/p perde una scarpetta.
+Cenerentola scappa.
+Cenerentola perde una scarpetta.
 ## La scarpetta
 Il principe cerca la ragazza.
 Il principe prova la scarpetta a tutte.
-La scarpetta va_bene=bene/a solo a Cenerentola=cenerentola|ragazza/p.
-Il principe sposa Cenerentola=cenerentola|ragazza/p.
+La scarpetta va bene solo a Cenerentola.
+Il principe sposa Cenerentola.
 Sono felici.
 Fine.`},
 {id:"lib-biancaneve", titolo:"Biancaneve", testo:`## La regina
 C'è una principessa.
-Si_chiama=chiamarsi|nome/v Biancaneve=biancaneve|principessa/p.
+Si chiama Biancaneve.
 La regina è cattiva.
 La regina ha uno specchio magico.
-Lo specchio dice: "Biancaneve=biancaneve|principessa/p è la più bella."
+Lo specchio dice: "Biancaneve è la più bella."
 La regina è arrabbiata.
 ## Il bosco
-Biancaneve=biancaneve|principessa/p scappa nel bosco.
+Biancaneve scappa nel bosco.
 Nel bosco c'è una casetta.
 Nella casetta vivono sette nani.
 I nani sono buoni.
-Biancaneve=biancaneve|principessa/p resta con i nani.
+Biancaneve resta con i nani.
 ## La mela
-La regina si_traveste=travestirsi|maschera/v da vecchia.
+La regina si traveste da vecchia.
 La vecchia porta una mela.
-La mela è avvelenata=veleno/a.
-Biancaneve=biancaneve|principessa/p mangia la mela.
-Biancaneve=biancaneve|principessa/p si_addormenta=addormentarsi|dormire/v.
+La mela è avvelenata.
+Biancaneve mangia la mela.
+Biancaneve si addormenta.
 I nani piangono.
 ## Il principe
 Arriva il principe.
-Il principe bacia Biancaneve=biancaneve|principessa/p.
-Biancaneve=biancaneve|principessa/p si_sveglia=svegliarsi/v.
+Il principe bacia Biancaneve.
+Biancaneve si sveglia.
 Tutti sono felici.
 Fine.`},
 {id:"lib-lepre", titolo:"La lepre e la tartaruga", testo:`## La sfida
@@ -463,13 +555,13 @@ Via!
 La lepre corre veloce.
 La tartaruga cammina piano.
 La lepre è molto avanti.
-La lepre si_ferma=fermarsi/v.
+La lepre si ferma.
 La lepre dorme sotto un albero.
 ## L'arrivo
 La tartaruga cammina.
-La tartaruga non si_ferma=fermarsi/v.
+La tartaruga non si ferma.
 La tartaruga passa la lepre.
-La lepre si_sveglia=svegliarsi/v.
+La lepre si sveglia.
 La lepre corre.
 È tardi!
 La tartaruga vince.
@@ -477,66 +569,95 @@ Piano piano si arriva lontano.
 Fine.`}
 ];
 
-/* ============ MOTORE ============ */
+/* ================================================================
+   2. LESSICO: espressioni che stanno in una cella sola, nomi propri,
+      parole con una chiave di ricerca migliore.  chiave "#123" = id fisso,
+      "a|b" = prova a, poi b.  cat: p persona, v azione, n cosa, a com'è, x altro
+================================================================ */
+const LESSICO = {
+  "pollicino":{chiave:"#7176",cat:"p"}, "cappuccetto rosso":{chiave:"cappuccetto rosso|bambina",cat:"p"},
+  "riccioli d'oro":{chiave:"bambina",cat:"p"}, "cenerentola":{chiave:"cenerentola|ragazza",cat:"p"},
+  "biancaneve":{chiave:"biancaneve|principessa",cat:"p"},
+  "porcellino":{chiave:"maiale",cat:"p"}, "porcellini":{chiave:"maiale",cat:"p"},
+  "si chiama":{chiave:"chiamarsi|nome",cat:"v"}, "ci sono":{chiave:"essere",cat:"v"}, "c'è":{chiave:"essere",cat:"v"},
+  "va via":{chiave:"andare via|andare",cat:"v"}, "scappa via":{chiave:"scappare",cat:"v"}, "va bene":{chiave:"bene",cat:"a"},
+  "per terra":{chiave:"terra",cat:"n"}, "a passeggio":{chiave:"passeggiare",cat:"v"},
+  "si mette":{chiave:"mettere",cat:"v"}, "si siede":{chiave:"sedersi",cat:"v"}, "si rompe":{chiave:"rompere",cat:"v"},
+  "si sveglia":{chiave:"svegliarsi",cat:"v"}, "si aprono":{chiave:"aprire",cat:"v"}, "si scotta":{chiave:"bruciare",cat:"v"},
+  "si traveste":{chiave:"travestirsi|maschera",cat:"v"}, "si addormenta":{chiave:"addormentarsi|dormire",cat:"v"},
+  "si ferma":{chiave:"fermarsi",cat:"v"}, "lo beccano":{chiave:"beccare",cat:"v"}, "lo abbracciano":{chiave:"abbracciare",cat:"v"},
+  "magici":{chiave:"magia|mago",cat:"a"}, "magico":{chiave:"magia|mago",cat:"a"}, "avvelenata":{chiave:"veleno",cat:"a"},
+  "è":{chiave:"essere",cat:"v"}, "sono":{chiave:"essere",cat:"v"}, "ha":{chiave:"avere",cat:"v"}, "hanno":{chiave:"avere",cat:"v"},
+  "fa":{chiave:"fare",cat:"v"}, "fanno":{chiave:"fare",cat:"v"}, "va":{chiave:"andare",cat:"v"}, "vanno":{chiave:"andare",cat:"v"},
+  "vai":{chiave:"andare",cat:"v"}, "vado":{chiave:"andare",cat:"v"}, "dà":{chiave:"dare",cat:"v"}, "dice":{chiave:"dire",cat:"v"},
+  "vede":{chiave:"vedere",cat:"v"}, "vedono":{chiave:"vedere",cat:"v"}, "esce":{chiave:"uscire",cat:"v"}, "viene":{chiave:"venire",cat:"v"},
+  "sta":{chiave:"stare",cat:"v"}, "può":{chiave:"potere",cat:"v"}, "vuole":{chiave:"volere",cat:"v"}, "sa":{chiave:"sapere",cat:"v"},
+  "beve":{chiave:"bere",cat:"v"}, "non":{chiave:"no",cat:"x"}, "e":{chiave:"e",cat:"x"}, "ma":{chiave:"ma",cat:"x"},
+  "più":{chiave:"più",cat:"a"}, "molto":{chiave:"molto",cat:"a"}, "tanti":{chiave:"molto",cat:"a"}, "tante":{chiave:"molto",cat:"a"},
+  "troppo":{chiave:"troppo",cat:"a"}, "tutti":{chiave:"tutti",cat:"p"}, "tutto":{chiave:"tutto",cat:"n"}, "ogni":{chiave:"tutti",cat:"a"},
+  "chi":{chiave:"chi",cat:"x"}, "dove":{chiave:"dove",cat:"x"}, "mio":{chiave:"mio",cat:"x"}, "mia":{chiave:"mio",cat:"x"},
+  "lui":{chiave:"lui",cat:"p"}, "lei":{chiave:"lei",cat:"p"}, "fine":{chiave:"fine",cat:"n"}, "via":{chiave:"andare via",cat:"v"},
+  "sei":{chiave:"sei",cat:"a"}, "tre":{chiave:"tre",cat:"a"}, "cinque":{chiave:"cinque",cat:"a"}, "sette":{chiave:"sette",cat:"a"},
+  "primo":{chiave:"primo",cat:"a"}, "secondo":{chiave:"secondo",cat:"a"}, "terzo":{chiave:"terzo",cat:"a"}, "ultimo":{chiave:"ultimo",cat:"a"},
+  "si":{chiave:null,cat:"x"}, "lo":{chiave:null,cat:"x"}, "che":{chiave:null,cat:"x"}
+};
+const ARTICOLI = new Set(["il","lo","la","i","gli","le","un","uno","una","l'","un'","nel","nello","nella","nei","negli","nelle","del","dello","della","dei","degli","delle","al","allo","alla","ai","agli","alle","dal","dallo","dalla","dai","dagli","dalle","sul","sullo","sulla","sui","sugli","sulle","a","di","da","in","con","su","per","tra","fra"]);
+
+/* ================================================================
+   3. STATO E SALVATAGGIO
+================================================================ */
+const $ = id => document.getElementById(id);
+const STORE = "fiabe-caa-v2", CACHE = "fiabe-caa-cache-v2", OPZ = "fiabe-caa-stampa-v2";
+const leggi = (k, d) => { try { return Object.assign(d, JSON.parse(localStorage.getItem(k) || "{}")); } catch(e) { return d; } };
+const scrivi = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
+
+let stato = leggi(STORE, {fiabe:[], attiva:null, mie:[], benvenuto:false, ultimoDownload:0, ultimaModifica:0});
+let cache = leggi(CACHE, {});
+let opz = leggi(OPZ, {pp:0, dim:110, ori:"portrait", cap:true, col:true, cen:false});
+
+const fiaba = () => stato.fiabe.find(f => f.id === stato.attiva);
+const eLibreria = f => f.id.startsWith("lib-");
+const modDi = f => (f.mod = Object.assign({scelte:{}, unioni:{}, separate:{}, cat:{}}, f.mod || {}));
+const salva = (modifica) => { if (modifica) stato.ultimaModifica = Date.now(); scrivi(STORE, stato); aggiornaAvviso(); };
+
+for (const l of LIBRERIA) if (!stato.fiabe.some(f => f.id === l.id)) stato.fiabe.push({id:l.id, titolo:l.titolo, testo:l.testo, mod:{}});
+if (!stato.fiabe.some(f => f.id === stato.attiva)) stato.attiva = stato.fiabe[0].id;
+
+/* ================================================================
+   4. RICERCA PITTOGRAMMI (ARASAAC)
+================================================================ */
 const API = "https://api.arasaac.org/api/pictograms/it";
 const IMG = id => String(id).startsWith("u-") ? ((stato.mie.find(m => m.id === id) || {}).data || "") : `https://static.arasaac.org/pictograms/${id}/${id}_300.png`;
-const STORE = "fiabe-caa-v1", CACHE = "fiabe-caa-cache-v1";
-
-// Parole che si uniscono alla parola dopo (articoli e preposizioni articolate)
-const ARTICOLI = new Set(["il","lo","la","i","gli","le","un","uno","una","l'","nel","nello","nella","nei","negli","nelle","del","dello","della","dei","degli","delle","al","allo","alla","ai","agli","alle","dal","dallo","dalla","dai","dagli","dalle","sul","sullo","sulla","sui","sugli","sulle","a","di","da","in","con","su","per","tra","fra"]);
-// Parole senza pittogramma proprio o con pittogramma fisso
-const FISSE = {"c'è":"essere","ci":"essere","si":null,"lo":null,"la":null,"e":"e","ma":"ma","non":"no","che":null,"è":"essere","sono":"essere","ha":"avere","hanno":"avere","fa":"fare","fanno":"fare","va":"andare","vanno":"andare","dà":"dare","dice":"dire","dicono":"dire","vede":"vedere","vedono":"vedere","esce":"uscire","escono":"uscire","viene":"venire","vengono":"venire","sta":"stare","stanno":"stare","può":"potere","vuole":"volere","sa":"sapere","beve":"bere","più":"più","molto":"molto","tanti":"molto","tante":"molto","tanto":"molto","troppo":"troppo","tutti":"tutti","tutto":"tutto","ogni":"tutti","chi":"chi","dove":"dove","mio":"mio","mia":"mio","sua":"suo","suo":"suo","fine":"fine","via":"andare via","sei":"sei","tre":"tre","cinque":"cinque","sette":"sette","primo":"primo","secondo":"secondo","terzo":"terzo","ultimo":"ultimo","lui":"lui","lei":"lei","vai":"andare","vado":"andare","torna":"tornare"};
-const CAT_FISSE = {"essere":"v","avere":"v","fare":"v","andare":"v","dare":"v","dire":"v","vedere":"v","uscire":"v","venire":"v","stare":"v","potere":"v","volere":"v","sapere":"v","bere":"v","tornare":"v","andare via":"v","più":"a","molto":"a","troppo":"a","sei":"a","tre":"a","cinque":"a","sette":"a","primo":"a","secondo":"a","terzo":"a","ultimo":"a","tutti":"p","tutto":"n","lui":"p","lei":"p","fine":"n"};
-
-let stato = {fiabe:[], attiva:null, mie:[]};
-try { Object.assign(stato, JSON.parse(localStorage.getItem(STORE) || "{}")); } catch(e) {}
-let cache = {};
-try { cache = JSON.parse(localStorage.getItem(CACHE) || "{}"); } catch(e) {}
-function salva(){ try { localStorage.setItem(STORE, JSON.stringify(stato)); } catch(e) {} }
-function salvaCache(){ try { localStorage.setItem(CACHE, JSON.stringify(cache)); } catch(e) {} }
-
-// Le fiabe della libreria entrano nel salvataggio la prima volta (poi si possono modificare)
-for (const l of LIBRERIA) if (!stato.fiabe.some(f => f.id === l.id)) stato.fiabe.push({id:l.id, titolo:l.titolo, testo:l.testo, mod:{}});
-if (!stato.attiva || !stato.fiabe.some(f => f.id === stato.attiva)) stato.attiva = stato.fiabe[0].id;
-stato.mie = stato.mie || [];
-salva();
-
 const inVolo = {};
+let inAttesa = 0;
+
+function catDaArasaac(p){
+  const tipi = (p.keywords || []).map(k => k.type), tag = (p.tags || []).concat(p.categories || []);
+  if (tipi.includes(3)) return "v";
+  if (tipi.includes(4) || tipi.includes(5)) return "a";
+  if (tag.some(t => /person|family|profession|animal|child|fantasy character|group/.test(t))) return "p";
+  return "n";
+}
 async function ricerca(chiave){
   if (cache[chiave]) return cache[chiave];
   if (inVolo[chiave]) return inVolo[chiave];
   inVolo[chiave] = (async () => {
-    for (const ep of ["bestsearch","search"]) {
+    for (const ep of ["bestsearch", "search"]) {
       try {
         const r = await fetch(`${API}/${ep}/${encodeURIComponent(chiave)}`);
-        if (r.ok) {
-          const j = await r.json();
-          if (j.length) {
-            const ris = j.slice(0, 40).map(p => ({id:p._id, cat:catDaArasaac(p)}));
-            cache[chiave] = ris; salvaCache(); return ris;
-          }
-        }
+        if (r.ok) { const j = await r.json(); if (j.length) { cache[chiave] = j.slice(0, 40).map(p => ({id:p._id, cat:catDaArasaac(p)})); scrivi(CACHE, cache); return cache[chiave]; } }
       } catch(e) {}
     }
-    cache[chiave] = []; salvaCache(); return [];
+    cache[chiave] = []; scrivi(CACHE, cache); return [];
   })();
   return inVolo[chiave];
 }
-function catDaArasaac(p){
-  const tipi = (p.keywords || []).map(k => k.type);
-  const tags = (p.tags || []).concat(p.categories || []);
-  if (tipi.includes(3)) return "v";
-  if (tipi.includes(4) || tipi.includes(5)) return "a";
-  if (tags.some(t => /person|family|profession|animal|child|fantasy character|group/.test(t))) return "p";
-  return "n";
-}
-// Candidati di ricerca per una parola italiana flessa
+// Forme possibili di una parola italiana flessa, dalla più probabile
 function candidati(w){
-  const c = [w];
-  const add = s => { if (s.length > 1 && !c.includes(s)) c.push(s); };
+  const c = [w], add = s => { if (s.length > 1 && !c.includes(s)) c.push(s); };
   const r = (suf, ...rep) => { if (w.endsWith(suf)) rep.forEach(x => add(w.slice(0, -suf.length) + x)); };
   r("ano","are"); r("ono","ere","ire"); r("iamo","are","ere","ire"); r("ate","are"); r("ete","ere"); r("ite","ire");
-  r("isce","ire"); r("iscono","ire"); r("ato","are"); r("ata","are"); r("ati","are"); r("ate","are"); r("uto","ere"); r("ito","ire");
+  r("isce","ire"); r("iscono","ire"); r("ato","are"); r("ata","are"); r("ati","are"); r("uto","ere"); r("ito","ire");
   r("chi","co"); r("ghi","go"); r("che","ca"); r("ghe","ga"); r("ci","cio","co"); r("gi","gio");
   r("ini","ino","o"); r("ine","ina","a"); r("ino","o"); r("ina","a"); r("etto","o"); r("etta","a"); r("etti","o"); r("ette","a");
   r("issimo","o"); r("issima","a"); r("issimi","o"); r("issime","a");
@@ -544,73 +665,109 @@ function candidati(w){
   return c;
 }
 async function trovaParola(chiave){
-  // chiave: "#123" | "parola|alternativa" | parola flessa
-  if (chiave.startsWith("#")) return {id:chiave.slice(1), cat:null, chiave:chiave};
+  if (chiave == null) return {id:null, cat:"x", chiave:""};
+  if (chiave.startsWith("#")) return {id:chiave.slice(1), cat:null, chiave};
   for (const alt of chiave.split("|")) {
-    const lista = alt in FISSE && FISSE[alt] === null ? [] : [FISSE[alt] || alt];
-    if (!(alt in FISSE)) lista.push(...candidati(alt).slice(1));
-    for (const c of lista) {
+    for (const c of candidati(alt)) {
       const ris = await ricerca(c);
-      if (ris.length) return {id:ris[0].id, cat:CAT_FISSE[c] || ris[0].cat, chiave:c};
+      if (ris.length) return {id:ris[0].id, cat:ris[0].cat, chiave:c};
     }
   }
   return {id:null, cat:"x", chiave:chiave.split("|")[0]};
 }
+function attesa(d){
+  inAttesa = Math.max(0, inAttesa + d);
+  $("statoImg").textContent = inAttesa ? "Sto cercando le immagini..." : "";
+}
 
-// Analisi del testo in capitoli -> frasi -> parole
+/* ================================================================
+   5. ANALISI DEL TESTO: capitoli -> frasi -> parole -> celle
+================================================================ */
+const pulisci = w => w.replace(/[.,!?:;"«»“”]+/g, "").toLowerCase();
+
 function analizza(testo){
   const cap = []; let cur = {titolo:"", frasi:[]};
   testo.split("\n").map(l => l.trim()).filter(Boolean).forEach(l => {
-    if (l.startsWith("##")) { if (cur.frasi.length || cur.titolo) cap.push(cur); cur = {titolo:l.replace(/^#+\s*/,""), frasi:[]}; }
+    if (l.startsWith("##")) { if (cur.frasi.length || cur.titolo) cap.push(cur); cur = {titolo:l.replace(/^#+\s*/, ""), frasi:[]}; }
     else cur.frasi.push(l);
   });
   if (cur.frasi.length || cur.titolo) cap.push(cur);
   return cap;
 }
+// Una frase diventa una lista di parole; le espressioni del lessico hanno lo stesso "base"
 function parole(frase){
-  const out = [];
-  frase.replace(/[«»"“”]/g,"").split(/\s+/).filter(Boolean).forEach((raw, bi) => {
-    const testo = raw.replace(/[.,!?:;]+$/,"");
-    const punt = raw.slice(testo.length);
-    let [parola, resto] = testo.split("/");
-    let chiave = null, cat = resto || null;
-    if (parola.includes("=")) [parola, chiave] = parola.split("=");
-    const pezzi = parola.split("_");
-    // l'orco -> l' + orco
-    const tok = [];
-    pezzi.forEach(p => { const m = p.match(/^(l'|un'|dell'|nell'|all'|dall'|sull')(.+)$/i); if (m) tok.push(m[1], m[2]); else tok.push(p); });
-    tok.forEach((p, k) => out.push({
-      testo: p + (k === tok.length - 1 ? punt : ""),
-      lower: p.toLowerCase(),
-      base: bi, nBase: tok.length,
-      chiaveBase: chiave, catBase: cat,
-      art: ARTICOLI.has(p.toLowerCase())
-    }));
+  const grezze = frase.replace(/["«»“”]/g, "").split(/\s+/).filter(Boolean);
+  const tok = [];
+  grezze.forEach(raw => {
+    const m = raw.match(/^(l'|un'|dell'|nell'|all'|dall'|sull')(.+)$/i);
+    if (m) tok.push(m[1], m[2]); else tok.push(raw);
   });
+  const out = []; let base = 0;
+  for (let i = 0; i < tok.length;) {
+    let len = 0, voce = null;
+    for (const n of [3, 2, 1]) {
+      const chiave = tok.slice(i, i + n).map(pulisci).join(" ");
+      if (i + n <= tok.length && LESSICO[chiave]) { len = n; voce = LESSICO[chiave]; break; }
+    }
+    if (!len) len = 1;
+    for (let k = 0; k < len; k++) {
+      const p = tok[i + k];
+      out.push({testo:p, lower:pulisci(p), base, chiaveBase:voce ? voce.chiave : undefined, catBase:voce ? voce.cat : null, art:ARTICOLI.has(pulisci(p))});
+    }
+    i += len; base++;
+  }
   return out;
 }
-// Celle: unione automatica articolo+parola e celle di base, più unioni/separazioni dell'utente
 function gruppi(ps, mod, fkey){
-  const unite = new Set((mod.unioni || {})[fkey] || []);
-  const separate = new Set((mod.separate || {})[fkey] || []);
+  const unite = new Set(mod.unioni[fkey] || []), separate = new Set(mod.separate[fkey] || []);
   const out = []; let g = [];
   ps.forEach((p, i) => {
     g.push(i);
     const next = ps[i + 1];
-    if (!next) { out.push(g); g = []; return; }
-    if (separate.has(i)) { out.push(g); g = []; return; }
-    const stessaBase = next.base === p.base;
-    const autoArt = p.art && !next.art && next.catBase !== "v" && !next.lower.match(/^(è|sono|ha|hanno|non)$/);
-    if (stessaBase || unite.has(i) || autoArt) return;
+    if (!next || separate.has(i)) { out.push(g); g = []; return; }
+    const autoArt = p.art && !next.art && next.catBase !== "v";
+    if (next.base === p.base || unite.has(i) || autoArt) return;
     out.push(g); g = [];
   });
   return out;
 }
 function chiaveGruppo(ps, g){
-  // Prima una chiave annotata, poi l'ultima parola piena (non articolo)
-  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (p.chiaveBase) return {chiave:p.chiaveBase, cat:p.catBase}; }
-  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (!p.art) return {chiave:p.lower, cat:p.catBase}; }
-  const u = ps[g[g.length - 1]]; return {chiave:u.lower, cat:"x"};
+  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (p.chiaveBase !== undefined) return {chiave:p.chiaveBase, cat:p.catBase}; }
+  for (let k = g.length - 1; k >= 0; k--) { const p = ps[g[k]]; if (!p.art) return {chiave:p.lower, cat:null}; }
+  return {chiave:ps[g[g.length - 1]].lower, cat:"x"};
+}
+
+/* ================================================================
+   6. INTERFACCIA
+================================================================ */
+const hash = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
+let righe = [], celle = [];
+
+function renderLista(){
+  const lista = $("lista"); lista.innerHTML = "";
+  const blocco = (nome, arr) => {
+    if (!arr.length) return;
+    const g = document.createElement("div"); g.className = "grp"; g.textContent = nome; lista.append(g);
+    arr.forEach(f => {
+      const b = document.createElement("button"); b.textContent = f.titolo || "Senza titolo";
+      b.className = f.id === stato.attiva ? "att" : ""; b.onclick = () => { stato.attiva = f.id; salva(); carica(); };
+      lista.append(b);
+    });
+  };
+  blocco("Le mie fiabe", stato.fiabe.filter(f => !eLibreria(f)));
+  blocco("Fiabe pronte", stato.fiabe.filter(eLibreria));
+}
+function aggiornaAvviso(){
+  const mie = stato.fiabe.some(f => !eLibreria(f));
+  $("avviso").hidden = !(mie && stato.ultimaModifica > stato.ultimoDownload);
+}
+function carica(){
+  const f = fiaba();
+  $("titolo").value = f.titolo; $("testo").value = f.testo;
+  $("bElimina").textContent = eLibreria(f) ? "Ripristina l'originale" : "Elimina questa fiaba";
+  $("bElimina").className = eLibreria(f) ? "sec" : "pericolo";
+  $("bRipristina").hidden = eLibreria(f);
+  renderLista(); render();
 }
 function mostraImg(pic, id, alt){
   pic.innerHTML = "";
@@ -619,207 +776,206 @@ function mostraImg(pic, id, alt){
   img.onerror = () => { pic.innerHTML = ""; };
   pic.append(img);
 }
-
-/* ============ INTERFACCIA ============ */
-const $ = id => document.getElementById(id);
-const OPZ = "fiabe-caa-stampa";
-let opz = {pp:0, dim:110, ori:"portrait", cap:true, col:true, cen:false};
-try { Object.assign(opz, JSON.parse(localStorage.getItem(OPZ) || "{}")); } catch(e) {}
-const stilePagina = document.createElement("style"); document.head.append(stilePagina);
-function applicaOpz(){
-  document.documentElement.style.setProperty("--pic", opz.dim + "px");
-  document.documentElement.style.setProperty("--tf", (opz.dim >= 150 ? 1.6 : opz.dim >= 110 ? 1.25 : 1.05) + "rem");
-  document.documentElement.style.setProperty("--pp", opz.pp || 1);
-  document.body.classList.toggle("pp", opz.pp > 0);
-  document.body.classList.toggle("no-cap", !opz.cap);
-  document.body.classList.toggle("no-colori", !opz.col);
-  document.body.classList.toggle("centra", opz.cen);
-  stilePagina.textContent = `@media print{@page{size:A4 ${opz.ori};margin:12mm}}`;
-  $("oPP").value = opz.pp; $("oDim").value = opz.dim; $("oOri").value = opz.ori; $("oCap").checked = opz.cap; $("oCol").checked = opz.col; $("oCen").checked = opz.cen;
-  try { localStorage.setItem(OPZ, JSON.stringify(opz)); } catch(e) {}
-}
-$("oPP").onchange = e => { opz.pp = +e.target.value; impagina(); };
-$("oCap").onchange = e => { opz.cap = e.target.checked; impagina(); };
-$("oDim").onchange = e => { opz.dim = +e.target.value; applicaOpz(); };
-$("oOri").onchange = e => { opz.ori = e.target.value; applicaOpz(); };
-$("oCol").onchange = e => { opz.col = e.target.checked; applicaOpz(); };
-$("oCen").onchange = e => { opz.cen = e.target.checked; applicaOpz(); };
-$("bOpz").onclick = () => { const on = $("opz").hidden = !$("opz").hidden; $("bOpz").setAttribute("aria-pressed", !on); };
-const fiabaEl = $("fiaba"), lista = $("lista"), titolo = $("titolo"), testo = $("testo");
-let celle = [];
-const fiaba = () => stato.fiabe.find(f => f.id === stato.attiva);
-const hash = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
-
-function renderLista(){
-  lista.innerHTML = "";
-  const mie = stato.fiabe.filter(f => !f.id.startsWith("lib-")), lib = stato.fiabe.filter(f => f.id.startsWith("lib-"));
-  const blocco = (nome, arr) => {
-    if (!arr.length) return;
-    const g = document.createElement("div"); g.className = "grp"; g.textContent = nome; lista.append(g);
-    arr.forEach(f => { const b = document.createElement("button"); b.textContent = f.titolo || "Senza titolo"; b.className = f.id === stato.attiva ? "att" : ""; b.onclick = () => { stato.attiva = f.id; salva(); carica(); }; lista.append(b); });
-  };
-  blocco("Le mie fiabe", mie); blocco("Fiabe pronte", lib);
-}
-function carica(){
-  const f = fiaba(); titolo.value = f.titolo; testo.value = f.testo;
-  $("cop").textContent = "Pittogrammi ARASAAC (arasaac.org), autore Sergio Palao, licenza CC BY-NC-SA, Governo d'Aragona.";
-  renderLista(); render();
-}
 function render(){
-  const f = fiaba(); f.mod = Object.assign({scelte:{}, unioni:{}, separate:{}, cat:{}}, f.mod || {});
-  fiabaEl.innerHTML = ""; celle = [];
-  const cap = analizza(f.testo);
-  if (!cap.length) { fiabaEl.innerHTML = '<p class="vuoto-msg">Scrivi la fiaba qui sopra e premi "Crea le celle".</p>'; return; }
-  righe = [];
-  cap.forEach((c, ci) => {
+  const f = fiaba(), mod = modDi(f);
+  righe = []; celle = [];
+  analizza(f.testo).forEach(c => {
     c.frasi.forEach((fr, fi) => {
-      const fkey = hash(fr) + "-" + fi;
-      const ps = parole(fr);
+      const fkey = hash(fr), ps = parole(fr);
       const riga = document.createElement("div"); riga.className = "frase";
-      if (fi === 0 && c.titolo) riga.dataset.cap = c.titolo;
-      gruppi(ps, f.mod, fkey).forEach(g => {
+      gruppi(ps, mod, fkey).forEach(g => {
         const key = fkey + "-" + g[0] + "-" + g[g.length - 1];
         const {chiave, cat} = chiaveGruppo(ps, g);
-        const label = g.map(i => ps[i].testo).join(" ").replace(/' /g,"'");
+        const label = g.map(i => ps[i].testo).join(" ").replace(/' /g, "'");
         const w = document.createElement("div"); w.className = "w x"; w.tabIndex = 0;
         const pic = document.createElement("div"); pic.className = "pic";
         const lab = document.createElement("div"); lab.className = "t"; lab.textContent = label;
         w.append(pic, lab); riga.append(w);
-        const cella = {key, fkey, ps, g, chiave, label, w, pic, idAuto:null, catAuto:"x"};
+        const cella = {key, fkey, ps, g, chiave, label, w, pic, idAuto:null, catAuto:"x", chiaveTrovata:""};
         cella.applica = () => {
-          const catF = (f.mod.cat || {})[key] || cat || cella.catAuto || "x";
-          w.className = "w " + catF;
-          mostraImg(pic, key in f.mod.scelte ? f.mod.scelte[key] : cella.idAuto, label);
+          w.className = "w " + (mod.cat[key] || cat || cella.catAuto || "x");
+          mostraImg(pic, key in mod.scelte ? mod.scelte[key] : cella.idAuto, label);
         };
         celle.push(cella);
-        trovaParola(chiave).then(r => { cella.idAuto = r.id; cella.catAuto = r.cat; cella.chiaveTrovata = r.chiave; cella.applica(); });
-        w.onclick = () => apri(cella);
-        w.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); apri(cella); } };
+        attesa(1);
+        trovaParola(chiave).then(r => { cella.idAuto = r.id; cella.catAuto = r.cat; cella.chiaveTrovata = r.chiave; cella.applica(); }).finally(() => attesa(-1));
+        w.onclick = () => apriCella(cella);
+        w.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); apriCella(cella); } };
       });
       righe.push({riga, cap: fi === 0 ? c.titolo : ""});
     });
   });
   impagina();
 }
-let righe = [];
 function impagina(){
-  fiabaEl.innerHTML = "";
-  if (!righe.length) return;
-  const f = fiaba();
+  const el = $("fiaba"); el.innerHTML = "";
+  if (!righe.length) {
+    el.innerHTML = '<div class="vuoto">Questa fiaba è ancora vuota.<br><button class="pri" onclick="apriEditor()">Scrivi il testo</button></div>';
+    applicaOpz(); return;
+  }
+  righe.forEach(r => { const h = r.riga.querySelector(".capo"); if (h) h.remove(); });
   if (!opz.pp) {
     let sez = null;
     righe.forEach(r => {
-      if (r.cap || !sez) { sez = document.createElement("section"); if (r.cap) { const h = document.createElement("h2"); h.textContent = r.cap; sez.append(h); } fiabaEl.append(sez); }
+      if (r.cap || !sez) { sez = document.createElement("section"); if (r.cap) { const h = document.createElement("h2"); h.textContent = r.cap; sez.append(h); } el.append(sez); }
       sez.append(r.riga);
     });
   } else {
     for (let i = 0; i < righe.length; i += opz.pp) {
       const pg = document.createElement("div"); pg.className = "pagina"; pg.style.setProperty("--n", opz.pp);
-      const testa = document.createElement("div"); testa.className = "testa"; testa.textContent = f.titolo; pg.append(testa);
-      righe.slice(i, i + opz.pp).forEach(r => { if (r.cap && opz.cap) { const h = document.createElement("div"); h.className = "capo"; h.textContent = r.cap; r.riga.prepend(h); } else { const h = r.riga.querySelector(".capo"); if (h) h.remove(); } pg.append(r.riga); });
-      fiabaEl.append(pg);
+      const testa = document.createElement("div"); testa.className = "testa"; testa.textContent = fiaba().titolo; pg.append(testa);
+      righe.slice(i, i + opz.pp).forEach(r => {
+        if (r.cap && opz.cap) { const h = document.createElement("div"); h.className = "capo"; h.textContent = r.cap; r.riga.prepend(h); }
+        pg.append(r.riga);
+      });
+      el.append(pg);
     }
   }
   applicaOpz();
 }
 
-// Editor
-$("bGenera").onclick = () => { const f = fiaba(); f.testo = testo.value; salva(); render(); };
-testo.addEventListener("input", () => { const f = fiaba(); f.testo = testo.value; salva(); });
-titolo.addEventListener("input", () => { const f = fiaba(); f.titolo = titolo.value; salva(); renderLista(); });
+/* ---- Opzioni di stampa ---- */
+const stilePagina = document.createElement("style"); document.head.append(stilePagina);
+function applicaOpz(){
+  const root = document.documentElement.style;
+  root.setProperty("--pic", opz.dim + "px");
+  root.setProperty("--tf", (opz.dim >= 150 ? 1.6 : opz.dim >= 110 ? 1.25 : 1.05) + "rem");
+  document.body.classList.toggle("pp", opz.pp > 0);
+  document.body.classList.toggle("no-cap", !opz.cap);
+  document.body.classList.toggle("no-colori", !opz.col);
+  document.body.classList.toggle("centra", opz.cen);
+  stilePagina.textContent = `@media print{@page{size:A4 ${opz.ori};margin:12mm}}`;
+  for (const [id, k] of [["sPP","pp"],["sDim","dim"],["sOri","ori"]]) $(id).querySelectorAll(".scelta").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v) === String(opz[k])));
+  $("oCap").checked = opz.cap; $("oCol").checked = opz.col; $("oCen").checked = opz.cen;
+  const n = righe.length;
+  $("conteggio").textContent = !n ? "" : opz.pp ? `Verranno stampati ${Math.ceil(n / opz.pp)} fogli (${n} frasi).` : `${n} frasi, di seguito: il numero di fogli dipende dalla lunghezza delle frasi.`;
+  scrivi(OPZ, opz);
+}
+for (const [id, k, num] of [["sPP","pp",true],["sDim","dim",true],["sOri","ori",false]])
+  $(id).onclick = e => { const b = e.target.closest(".scelta"); if (!b) return; opz[k] = num ? +b.dataset.v : b.dataset.v; impagina(); };
+$("oCap").onchange = e => { opz.cap = e.target.checked; impagina(); };
+$("oCol").onchange = e => { opz.col = e.target.checked; applicaOpz(); };
+$("oCen").onchange = e => { opz.cen = e.target.checked; applicaOpz(); };
+$("bStampa").onclick = () => { applicaOpz(); $("dStampa").showModal(); };
+$("bChiudiStampa").onclick = () => $("dStampa").close();
+$("bStampaOra").onclick = () => { $("dStampa").close(); setTimeout(() => window.print(), 150); };
+
+/* ---- Barra in alto ---- */
+$("titolo").addEventListener("input", () => { fiaba().titolo = $("titolo").value; salva(true); renderLista(); });
+$("bMaiu").onclick = () => { const on = document.body.classList.toggle("maiu"); $("bMaiu").setAttribute("aria-pressed", on); $("bMaiu").textContent = on ? "MAIUSCOLO" : "minuscolo"; };
+
+/* ---- Editor del testo ---- */
+function apriEditor(){ $("testo").value = fiaba().testo; $("dEditor").showModal(); }
+$("bModifica").onclick = apriEditor;
+$("bFatto").onclick = () => { fiaba().testo = $("testo").value; salva(true); $("dEditor").close(); render(); };
+$("dEditor").onclose = () => { if (fiaba().testo !== $("testo").value) { fiaba().testo = $("testo").value; salva(true); render(); } };
 $("bNuova").onclick = () => {
   const f = {id:"f-" + Date.now(), titolo:"Nuova fiaba", testo:"", mod:{}};
-  stato.fiabe.unshift(f); stato.attiva = f.id; salva(); carica(); titolo.focus(); titolo.select();
+  stato.fiabe.unshift(f); stato.attiva = f.id; salva(true); carica(); apriEditor();
 };
 $("bDuplica").onclick = () => {
-  const o = fiaba(); const f = {id:"f-" + Date.now(), titolo:o.titolo + " (copia)", testo:o.testo, mod:JSON.parse(JSON.stringify(o.mod || {}))};
-  stato.fiabe.unshift(f); stato.attiva = f.id; salva(); carica();
+  const o = fiaba(), f = {id:"f-" + Date.now(), titolo:o.titolo + " (copia)", testo:$("testo").value, mod:JSON.parse(JSON.stringify(o.mod || {}))};
+  stato.fiabe.unshift(f); stato.attiva = f.id; salva(true); $("dEditor").close(); carica(); toast("Copia creata: ora stai lavorando sulla copia");
 };
+$("bRipristina").onclick = () => { snapshot(); modDi(fiaba()); fiaba().mod = {}; salva(true); render(); $("dEditor").close(); toast("Celle riportate all'inizio"); };
 $("bElimina").onclick = () => {
-  const f = fiaba();
-  if (f.id.startsWith("lib-")) { const l = LIBRERIA.find(x => x.id === f.id); f.testo = l.testo; f.titolo = l.titolo; f.mod = {}; salva(); carica(); return; }
-  if (stato.fiabe.length <= 1) return;
-  const b = $("bElimina");
-  if (b.dataset.conf !== "1") { b.dataset.conf = "1"; b.textContent = "Sicura? Clicca ancora"; setTimeout(() => { b.dataset.conf = ""; b.textContent = "Elimina fiaba"; }, 3000); return; }
-  b.dataset.conf = ""; b.textContent = "Elimina fiaba";
-  stato.fiabe = stato.fiabe.filter(x => x.id !== f.id); stato.attiva = stato.fiabe[0].id; salva(); carica();
+  const f = fiaba(), b = $("bElimina");
+  if (eLibreria(f)) { const l = LIBRERIA.find(x => x.id === f.id); Object.assign(f, {testo:l.testo, titolo:l.titolo, mod:{}}); salva(true); $("dEditor").close(); carica(); toast("Fiaba riportata all'originale"); return; }
+  if (!b.classList.contains("conf")) { b.classList.add("conf"); b.textContent = "Sicura? Clicca di nuovo per eliminare"; setTimeout(() => { b.classList.remove("conf"); b.textContent = "Elimina questa fiaba"; }, 3500); return; }
+  stato.fiabe = stato.fiabe.filter(x => x.id !== f.id); stato.attiva = stato.fiabe[0].id; salva(true); $("dEditor").close(); carica(); toast("Fiaba eliminata");
 };
-$("bReset").onclick = () => { fiaba().mod = {}; salva(); render(); };
-$("bTesto").onclick = () => { const on = $("editor").hidden = !$("editor").hidden; $("bTesto").setAttribute("aria-pressed", !on); };
-$("bMaiu").onclick = () => { const on = document.body.classList.toggle("maiu"); $("bMaiu").setAttribute("aria-pressed", on); $("bMaiu").textContent = on ? "MAIUSCOLO" : "minuscolo"; };
-$("bStampa").onclick = () => window.print();
 
-// Salva/carica copia di tutte le fiabe (file .json)
-$("bEsporta").onclick = () => {
+/* ---- Scarica / apri file ---- */
+function scarica(){
   const blob = new Blob([JSON.stringify(stato, null, 1)], {type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "fiabe-caa.json"; a.click();
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "le-mie-fiabe-caa.json"; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
+  stato.ultimoDownload = Date.now(); salva(); toast("File scaricato: conservalo per riaprire le tue fiabe su un altro dispositivo");
+}
+$("bEsporta").onclick = scarica; $("bScaricaAvviso").onclick = scarica;
 $("bImporta").onclick = () => $("fImporta").click();
 $("fImporta").onchange = async e => {
-  const file = e.target.files[0]; if (!file) return;
+  const file = e.target.files[0]; e.target.value = ""; if (!file) return;
   try {
     const j = JSON.parse(await file.text());
     if (!Array.isArray(j.fiabe)) throw 0;
     for (const f of j.fiabe) { const i = stato.fiabe.findIndex(x => x.id === f.id); if (i >= 0) stato.fiabe[i] = f; else stato.fiabe.push(f); }
     for (const m of (j.mie || [])) if (!stato.mie.some(x => x.id === m.id)) stato.mie.push(m);
-    stato.attiva = j.attiva || stato.attiva; salva(); carica();
-  } catch(err) { alert("Questo file non è una copia delle fiabe."); }
-  e.target.value = "";
+    stato.attiva = j.attiva || stato.attiva; salva(); carica(); toast("Fiabe caricate");
+  } catch(err) { toast("Questo file non contiene fiabe"); }
 };
 
-// Finestra di modifica cella
-const dlg = $("dlg"), griglia = $("griglia"), iCerca = $("iCerca"), dTitolo = $("dTitolo"), bUnisci = $("bUnisci"), bSepara = $("bSepara");
+/* ---- Toast con Annulla ---- */
+let precedente = null, toastTimer = null;
+function snapshot(){ precedente = {id:stato.attiva, mod:JSON.stringify(fiaba().mod || {})}; }
+function toast(testo, annullabile){
+  $("toastTesto").textContent = testo; $("bAnnulla").hidden = !annullabile; $("toast").hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, annullabile ? 7000 : 3500);
+}
+$("bAnnulla").onclick = () => {
+  if (!precedente || precedente.id !== stato.attiva) return;
+  fiaba().mod = JSON.parse(precedente.mod); precedente = null; salva(true); render(); $("toast").hidden = true;
+};
+function modifica(cella, testo, fn){
+  snapshot(); fn(modDi(fiaba())); salva(true);
+  $("dCella").close(); render();
+  const c = celle.find(x => x.key === cella.key) || celle.find(x => x.fkey === cella.fkey);
+  if (c) { c.w.classList.add("lampo"); c.w.scrollIntoView({block:"nearest"}); }
+  toast(testo, true);
+}
+
+/* ---- Finestra della cella ---- */
 let corrente = null;
+function scheda(img){
+  $("tImg").setAttribute("aria-selected", img); $("tPar").setAttribute("aria-selected", !img);
+  $("sImg").hidden = !img; $("sPar").hidden = img;
+}
+$("tImg").onclick = () => scheda(true); $("tPar").onclick = () => scheda(false);
 async function riempi(chiave){
-  griglia.innerHTML = `<div class="stato">Cerco...</div>`;
-  let ids = chiave.startsWith("#") ? [{id:chiave.slice(1)}] : await ricerca(chiave);
-  if (!ids.length) for (const c of candidati(chiave).slice(1)) { ids = await ricerca(c); if (ids.length) break; }
-  if (!ids.length && !stato.mie.length) { griglia.innerHTML = `<div class="stato">Nessun pittogramma per questa parola. Prova con un sinonimo, al singolare, oppure carica una foto.</div>`; return; }
+  const griglia = $("griglia"), mod = modDi(fiaba());
+  griglia.innerHTML = '<div class="stato">Cerco...</div>';
+  let ids = chiave.startsWith("#") ? [{id:chiave.slice(1)}] : [];
+  if (!ids.length) for (const c of candidati(chiave)) { ids = await ricerca(c); if (ids.length) break; }
+  if (corrente.chiaveRichiesta !== chiave) return;
   griglia.innerHTML = "";
-  const f = fiaba(), attuale = corrente.key in f.mod.scelte ? f.mod.scelte[corrente.key] : corrente.idAuto;
-  [...stato.mie.map(m => ({id:m.id})), ...ids].forEach(({id}) => {
+  const attuale = corrente.key in mod.scelte ? mod.scelte[corrente.key] : corrente.idAuto;
+  const tutte = [...stato.mie.map(m => ({id:m.id})), ...ids];
+  if (!tutte.length) { griglia.innerHTML = '<div class="stato">Nessuna immagine per questa parola. Prova un sinonimo, al singolare, oppure carica una foto.</div>'; return; }
+  tutte.forEach(({id}) => {
     const o = document.createElement("div"); o.className = "opt" + (String(id) === String(attuale) ? " sel" : "");
     const img = new Image(); img.src = IMG(id); img.alt = ""; img.loading = "lazy"; o.append(img);
-    o.onclick = () => { f.mod.scelte[corrente.key] = id; salva(); corrente.applica(); dlg.close(); };
+    o.onclick = () => modifica(corrente, "Immagine cambiata", m => { m.scelte[corrente.key] = id; });
     griglia.append(o);
   });
 }
-function apri(cella){
+function apriCella(cella){
   corrente = cella;
-  const pulito = cella.label.replace(/[.,!?:;]+$/,"");
-  dTitolo.textContent = `Cella "${pulito}"`;
-  iCerca.value = cella.chiaveTrovata && !cella.chiaveTrovata.startsWith("#") ? cella.chiaveTrovata : pulito.toLowerCase();
-  bUnisci.disabled = cella.g[cella.g.length - 1] >= cella.ps.length - 1;
+  const pulito = cella.label.replace(/[.,!?:;]+$/, "");
+  $("cTitolo").textContent = `"${pulito}"`;
+  const chiave = cella.chiaveTrovata && !cella.chiaveTrovata.startsWith("#") ? cella.chiaveTrovata : pulito.toLowerCase();
+  $("iCerca").value = chiave; corrente.chiaveRichiesta = chiave;
+  $("bUnisciDx").disabled = cella.g[cella.g.length - 1] >= cella.ps.length - 1;
   $("bUnisciSx").disabled = cella.g[0] === 0;
-  bSepara.disabled = cella.g.length < 2;
-  const catAtt = cella.w.className.replace("w ","");
-  document.querySelectorAll(".cat button").forEach(b => b.setAttribute("aria-pressed", b.dataset.cat === catAtt));
-  riempi(iCerca.value);
-  dlg.showModal();
+  $("bSepara").disabled = cella.g.length < 2;
+  const catAtt = cella.w.className.replace("w ", "");
+  document.querySelectorAll(".colori button").forEach(b => b.setAttribute("aria-pressed", b.dataset.cat === catAtt));
+  scheda(true); riempi(chiave); $("dCella").showModal();
 }
-$("fCerca").onsubmit = e => { e.preventDefault(); const q = iCerca.value.trim().toLowerCase(); if (q) riempi(q); };
-$("bNessuna").onclick = () => { const f = fiaba(); f.mod.scelte[corrente.key] = null; salva(); corrente.applica(); dlg.close(); };
-$("bChiudi").onclick = () => dlg.close();
-dlg.onclick = e => { if (e.target === dlg) dlg.close(); };
-document.querySelectorAll(".cat button").forEach(b => b.onclick = () => {
-  const f = fiaba(); f.mod.cat = f.mod.cat || {}; f.mod.cat[corrente.key] = b.dataset.cat; salva(); corrente.applica();
-  document.querySelectorAll(".cat button").forEach(x => x.setAttribute("aria-pressed", x === b));
-});
-bUnisci.onclick = () => {
-  const f = fiaba(), c = corrente, ultimo = c.g[c.g.length - 1];
-  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
-  const u = new Set(f.mod.unioni[c.fkey] || []); u.add(ultimo); f.mod.unioni[c.fkey] = [...u];
-  const sp = new Set(f.mod.separate[c.fkey] || []); sp.delete(ultimo); f.mod.separate[c.fkey] = [...sp];
-  salva(); dlg.close(); render();
-};
-$("bUnisciSx").onclick = () => {
-  const f = fiaba(), c = corrente, prima = c.g[0] - 1;
-  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
-  const u = new Set(f.mod.unioni[c.fkey] || []); u.add(prima); f.mod.unioni[c.fkey] = [...u];
-  const sp = new Set(f.mod.separate[c.fkey] || []); sp.delete(prima); f.mod.separate[c.fkey] = [...sp];
-  salva(); dlg.close(); render();
-};
+$("fCerca").onsubmit = e => { e.preventDefault(); const q = $("iCerca").value.trim().toLowerCase(); if (q) { corrente.chiaveRichiesta = q; riempi(q); } };
+$("bNessuna").onclick = () => modifica(corrente, "Cella senza immagine", m => { m.scelte[corrente.key] = null; });
+$("bChiudiCella").onclick = $("bChiudiCella2").onclick = () => $("dCella").close();
+for (const d of document.querySelectorAll("dialog")) d.addEventListener("click", e => { if (e.target === d) d.close(); });
+document.querySelectorAll(".colori button").forEach(b => b.onclick = () => modifica(corrente, "Colore cambiato", m => { m.cat[corrente.key] = b.dataset.cat; }));
+$("bUnisciDx").onclick = () => { const c = corrente, i = c.g[c.g.length - 1]; modifica(c, "Parole unite", m => unisci(m, c.fkey, i)); };
+$("bUnisciSx").onclick = () => { const c = corrente, i = c.g[0] - 1; modifica(c, "Parole unite", m => unisci(m, c.fkey, i)); };
+$("bSepara").onclick = () => { const c = corrente; modifica(c, "Parole separate", m => {
+  const u = new Set(m.unioni[c.fkey] || []); c.g.forEach(i => u.delete(i)); m.unioni[c.fkey] = [...u];
+  const sp = new Set(m.separate[c.fkey] || []); c.g.slice(0, -1).forEach(i => sp.add(i)); m.separate[c.fkey] = [...sp];
+}); };
+function unisci(m, fkey, i){
+  const u = new Set(m.unioni[fkey] || []); u.add(i); m.unioni[fkey] = [...u];
+  const sp = new Set(m.separate[fkey] || []); sp.delete(i); m.separate[fkey] = [...sp];
+}
 $("bFoto").onclick = () => $("fFoto").click();
 $("fFoto").onchange = e => {
   const file = e.target.files[0]; e.target.value = ""; if (!file) return;
@@ -832,22 +988,14 @@ $("fFoto").onchange = e => {
     URL.revokeObjectURL(img.src);
     const m = {id:"u-" + Date.now().toString(36), data:c.toDataURL("image/jpeg", 0.82)};
     stato.mie.push(m);
-    const f = fiaba(); f.mod.scelte[corrente.key] = m.id;
-    try { salva(); } catch(err) {}
-    corrente.applica(); dlg.close();
+    modifica(corrente, "Foto inserita", mod => { mod.scelte[corrente.key] = m.id; });
   };
   img.src = URL.createObjectURL(file);
 };
-bSepara.onclick = () => {
-  const f = fiaba(), c = corrente;
-  f.mod.unioni = f.mod.unioni || {}; f.mod.separate = f.mod.separate || {};
-  const u = new Set(f.mod.unioni[c.fkey] || []); c.g.forEach(i => u.delete(i)); f.mod.unioni[c.fkey] = [...u];
-  const sp = new Set(f.mod.separate[c.fkey] || []); c.g.slice(0, -1).forEach(i => sp.add(i)); f.mod.separate[c.fkey] = [...sp];
-  salva(); dlg.close(); render();
-};
 
+/* ---- Avvio ---- */
 carica();
-applicaOpz();
+if (!stato.benvenuto) { $("dBenvenuto").showModal(); $("bInizia").onclick = () => { stato.benvenuto = true; salva(); $("dBenvenuto").close(); }; }
 </script>
 </body>
 </html>
