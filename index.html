@@ -666,7 +666,7 @@ function carica(){
   renderLista(); render();
 }
 function render(){
-  const f = fiaba(); f.mod = f.mod || {scelte:{}, unioni:{}, separate:{}, cat:{}};
+  const f = fiaba(); f.mod = Object.assign({scelte:{}, unioni:{}, separate:{}, cat:{}}, f.mod || {});
   fiabaEl.innerHTML = ""; celle = [];
   const cap = analizza(f.testo);
   if (!cap.length) { fiabaEl.innerHTML = '<p class="vuoto-msg">Scrivi la fiaba qui sopra e premi "Crea le celle".</p>'; return; }
